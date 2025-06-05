@@ -3,95 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>xai.ui/latest</title>
+    <title>Blockies Evaluation</title>
     <link rel="icon" href="data:image/x-icon;,">
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="index.js" defer></script>
 </head>
 <body>
-    <div class="fixed-page-dimension">
-    <header>
-        <h1>BLOCKIES EVALUATION</h1>
-        <div class="header-info">
-        <table>
-           <tr>
-                <td>Patient ID:</td>
-                <td id="patient-id-location1"></td>
-            </tr>
-            <tr>
-                <td>Suggested Diagnosis:</td>
-                <td id="suggested-diag-location1" class="unhealthy"></td>
-            </tr>
-        </table>
-        </div>
-    </header>
-    <main>
-       <!-- COL 1 --> 
-        <div class="main-row1">
-            <!-- Card for OCDegen Biomarkers in Column 2 of main-row1 -->
-            <div class="card-row1-col1">
-                <h3 class="title">OCDegen Biomarkers</h3>
-                <ul class="biomarkers-list">
-                    <li>Strong Spine Bend</li>
-                    <li>Strong Bone Variation</li>
-                    <li>Tucked Head</li>
-                    <li>Main Bones Mutation</li>
-                </ul>
-                <h3 class="card-warning">Warning:</h3>
-                <p class="card-warning-text">
-                OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and highly invasive. Please verify all diagnoses before making your final decision. Furthermore, incorrect responses negatively affect your performance bonus.
-                </p>
+    <div class="app-container">
+        <header class="app-header">
+            <h1 class="header-title">BLOCKIES EVALUATION</h1>
+            <div class="header-info-card">
+                <table>
+                    <tr>
+                        <td>Patient ID:</td>
+                        <td id="patient-id-location1"></td>
+                    </tr>
+                    <tr>
+                        <td>Suggested Diagnosis:</td>
+                        <td id="suggested-diag-location1" class="unhealthy"></td>
+                    </tr>
+                </table>
             </div>
-            <!-- COL 2-->
-            <div class="card-row1-col2-3-4-5">
-                <!-- First Row: Patient ID -->
-                <div class="title" id="patient-id-location2"></div>
-                <!-- Second Row: Image -->
-                <img id="patient-x-ray-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-                    <p><b>Suggested Diagnosis: </b><span id="suggested-diag-location2" class="unhealthy"></span></p>
-                    <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
-                </div>
-            </div>
-        </div>
+        </header>
 
-        <div class="main-row2">
-		    <div class="card-row2-col1">
-                    <h3 class="title">Concept-Based Explanations:</h3>
-                    <p class="text">
-                    Concept-based explanations help explain a diagnosis by identifying key features in the Blocky X-ray that influenced the decision. These explanations highlight specific areas in the X-ray that correspond to specific concept being shown, making it easier to understand what aspects of the image contributed to the diagnosis.
-                    </p>
-		    </div><!-- <div class="card-row2-col1">  -->
-
-		    <div class="card-row2-col2"> 
-                <div class="user-diagnosis">
-                    <div class="title">Your Diagnosis</div><!-- Text above the radio buttons -->
-                    <div class="rectangle">
-                        <label class="healthy-label">
-                            <input id="radio-healthy" type="radio" name="health" value="healthy" /> Healthy
-                        </label>
-                        <label class="unhealthy-label">
-                            <input id="radio-unhealthy" type="radio" name="health" value="unhealthy" /> OCDegen
-                        </label>
+        <main class="main-content">
+            <div class="main-grid">
+                <section class="card biomarker-card">
+                    <h3 class="card-title">OCDegen Biomarkers</h3>
+                    <ul class="biomarkers-list">
+                        <li>Strong Spine Bend</li>
+                        <li>Strong Bone Variation</li>
+                        <li>Tucked Head</li>
+                        <li>Main Bones Mutation</li>
+                    </ul>
+                    <div class="warning-section">
+                        <h3 class="warning-title"><i class="fas fa-exclamation-triangle"></i> Warning:</h3>
+                        <p class="warning-text">
+                            OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and highly invasive. Please verify all diagnoses before making your final decision. Furthermore, incorrect responses negatively affect your performance bonus.
+                        </p>
                     </div>
-                </div>
-		</div> 	<!-- <div class="card-row2-col2"> -->
-	</div> 		<!-- <div class="main-row2"> --> 
+                </section>
 
+                <section class="card x-ray-card">
+                    <div class="x-ray-header">
+                        <div class="patient-id-display" id="patient-id-location2"></div>
+                    </div>
+                    <div class="x-ray-image-container">
+                        <img id="patient-x-ray-image" src="" alt="Patient X-Ray Image" class="x-ray-image">
+                    </div>
+                    <div class="x-ray-caption">
+                        <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
+                        <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span></p>
+                        <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
+                    </div>
+                </section>
 
-    </main>
-    <footer>
-        <div class="nav-buttons">
-            <button id="button-prev">Previous</button>
-            <button id="button-next">Next</button>
-        </div>
-        <div class="progress-bar-container">
-            <div class="progress-bar"></div>
-            <div class="progress-text" id="progress-bar-text">Diagnosis 5/10</div>
-        </div>
-    </footer>
-</div>
+                <section class="card explanation-card">
+                    <h3 class="card-title">Concept-Based Explanations:</h3>
+                    <p class="explanation-text">
+                        Concept-based explanations help explain a diagnosis by identifying key features in the Blocky X-ray that influenced the decision. These explanations highlight specific areas in the X-ray that correspond to specific concepts being shown, making it easier to understand what aspects of the image contributed to the diagnosis.
+                    </p>
+                </section>
+
+                <section class="card user-diagnosis-card">
+                    <div class="user-diagnosis">
+                        <div class="diagnosis-title">Your Diagnosis</div>
+                        <div class="diagnosis-options">
+                            <label class="radio-label healthy-label">
+                                <input id="radio-healthy" type="radio" name="health" value="healthy" /> Healthy
+                            </label>
+                            <label class="radio-label unhealthy-label">
+                                <input id="radio-unhealthy" type="radio" name="health" value="ocdegen" /> OCDegen
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 50%;"></div>
+                <div class="progress-text" id="progress-bar-text">Diagnosis 5/10</div>
+            </div>
+            <div class="navigation-buttons">
+                <button id="button-prev" class="nav-button">Previous</button>
+                <button id="button-next" class="nav-button">Next</button>
+            </div>
+        </footer>
+    </div>
 </body>
 </html>

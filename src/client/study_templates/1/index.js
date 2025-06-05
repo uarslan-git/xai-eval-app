@@ -15,7 +15,7 @@ const patient_id2 = document.getElementById("patient-id-location2");
 const x_ray_location = document.getElementById("x-ray-location");
 const suggested_diag1 = document.getElementById("suggested-diag-location1");
 const suggested_diag2 = document.getElementById("suggested-diag-location2");
-const true_diag   = document.getElementById("true-diag");
+const true_diag    = document.getElementById("true-diag");
 const x_ray_image = document.getElementById("patient-x-ray-image");
 
 let diagnosis = null;
@@ -88,7 +88,7 @@ function clear_radio_buttons() {
 
 function set_progress(current_page_nr, total_page_count) {
     let progress_value = (current_page_nr / total_page_count) * 100; // Convert to percentage
-    let progress_bar = document.querySelector("footer .progress-bar");
+    let progress_bar = document.querySelector(".progress-bar");
     progress_bar.style.width = progress_value + "%";
 
     document.getElementById("progress-bar-text").textContent = "Diagnosis " + current_page_nr.toString() + "/" + total_page_count.toString();
@@ -365,7 +365,7 @@ function csv_json_get_main_attributes(page_nr)
 
     index = page_nr - 1;
     l_patient_id = input.PATIENT_ID[index];
-    l_x_ray_loc  = input.X_RAY_LOCATION[index];
+    l_x_ray_loc    = input.X_RAY_LOCATION[index];
     l_true_diag = input.TRUE_DIAG[index];
     l_suggested_diag = input.SUGGESTED_DIAG[index];
     l_image = "img/" + input.X_RAY_IMAGE[index];
@@ -431,6 +431,3 @@ button_next.addEventListener("click", function() {
 button_prev.addEventListener("click", function() {
     prev_button_action();
 });
-
-
-
