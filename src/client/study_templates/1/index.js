@@ -424,6 +424,75 @@ document.addEventListener('DOMContentLoaded', async function() {
     await load_json_data();
 });
 
+// --- Mockserver integration for diagnosis options, evidences, and heatmap overlay ---
+async function fetchDiagnosisOptions() {
+  // Example: hardcoded for demo, replace with API if needed
+  return ['A', 'B', 'C', 'D', 'E'];
+}
+
+async function fetchEvidences(hypothesis) {
+  const res = await fetch('http://localhost:4000/api/evidences', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hypothesis })
+  });
+  return (await res.json()).evidences;
+}
+
+async function fetchHeatmap(imageId) {
+  const res = await fetch(`http://localhost:4000/api/heatmap/${imageId}`);
+  return (await res.json()).heatmap;
+}
+
+function renderDiagnosisOptions(options) {
+  const container = document.querySelector('.diagnosis-options');
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'radio-label unhealthy-label';
+    label.innerHTML = `<input type="radio" name="health" value="${opt}"/> ${opt}`;
+    container.appendChild(label);
+  });
+}
+
+function renderEvidences(evidences) {
+  let html = '';
+  html += '<div><b>Evidence For:</b><ul>' + evidences.for.map(e => `<li>${e}</li>`).join('') + '</ul></div>';
+  html += '<div><b>Evidence Against:</b><ul>' + evidences.against.map(e => `<li>${e}</li>`).join('') + '</ul></div>';
+  const expl = document.querySelector('.explanation-card .explanation-text');
+  if (expl) expl.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  // Render diagnosis options
+  const options = await fetchDiagnosisOptions();
+  renderDiagnosisOptions(options);
+
+  // Listen for diagnosis change
+  const diagContainer = document.querySelector('.diagnosis-options');
+  if (diagContainer) {
+    diagContainer.addEventListener('change', async e => {
+      if (e.target.name === 'health') {
+        const evidences = await fetchEvidences(e.target.value);
+        renderEvidences(evidences);
+      }
+    });
+  }
+
+  // Show heatmap overlay
+  const imageId = '123'; // Replace with real image ID if available
+  const heatmapUrl = await fetchHeatmap(imageId);
+  let overlay = document.getElementById('heatmap-overlay');
+  if (!overlay) {
+    overlay = document.createElement('img');
+    overlay.id = 'heatmap-overlay';
+    const container = document.querySelector('.x-ray-image-container');
+    if (container) container.appendChild(overlay);
+  }
+  overlay.src = heatmapUrl;
+});
+
 button_next.addEventListener("click", function() {
     next_button_action();
 });

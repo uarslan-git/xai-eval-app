@@ -12,7 +12,7 @@ const path = require('path');
 // From server/server.js the project root is one level above
 const project_root = "../";
 const app = express();
-const db_path = path.join(__dirname, project_root, 'database/database.db');
+const db_path = path.join(__dirname, '../../database/database.db');
 const PORT = 7000;
 const client_ui_web_pages_location='client';
 let db;
