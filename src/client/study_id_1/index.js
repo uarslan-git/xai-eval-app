@@ -550,3 +550,128 @@ button_next.addEventListener("click", function() {
 button_prev.addEventListener("click", function() {
     prev_button_action();
 });
+
+// Plexus Animation System
+class PlexusAnimation {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.particles = [];
+        this.mouse = { x: 0, y: 0 };
+        this.animationId = null;
+        
+        this.setupCanvas();
+        this.createParticles();
+        this.bindEvents();
+        this.animate();
+    }
+    
+    setupCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+    
+    createParticles() {
+        const particleCount = Math.floor((this.canvas.width * this.canvas.height) / 15000);
+        this.particles = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2 + 1
+            });
+        }
+    }
+    
+    bindEvents() {
+        window.addEventListener('mousemove', (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+        
+        window.addEventListener('resize', () => {
+            this.setupCanvas();
+            this.createParticles();
+        });
+    }
+    
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Update particles
+        this.particles.forEach(particle => {
+            // Mouse attraction
+            const dx = this.mouse.x - particle.x;
+            const dy = this.mouse.y - particle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 150) {
+                const force = (150 - distance) / 150;
+                particle.vx += (dx / distance) * force * 0.03;
+                particle.vy += (dy / distance) * force * 0.03;
+            }
+            
+            // Update position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            
+            // Boundary checks
+            if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
+            if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
+            
+            // Friction
+            particle.vx *= 0.99;
+            particle.vy *= 0.99;
+        });
+        
+        // Draw particles
+        this.ctx.fillStyle = '#2563eb';
+        this.particles.forEach(particle => {
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+        
+        // Draw connections
+        this.ctx.strokeStyle = '#3b82f6';
+        this.ctx.lineWidth = 0.5;
+        
+        for (let i = 0; i < this.particles.length; i++) {
+            for (let j = i + 1; j < this.particles.length; j++) {
+                const dx = this.particles[i].x - this.particles[j].x;
+                const dy = this.particles[i].y - this.particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 100) {
+                    const opacity = (100 - distance) / 100;
+                    this.ctx.globalAlpha = opacity * 0.4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+                    this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+                    this.ctx.stroke();
+                }
+            }
+        }
+        
+        this.ctx.globalAlpha = 1;
+        this.animationId = requestAnimationFrame(() => this.animate());
+    }
+    
+    destroy() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+    }
+}
+
+// Initialize animations and cursor when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Plexus Animation
+    const canvas = document.getElementById('plexus-canvas');
+    if (canvas) {
+        new PlexusAnimation(canvas);
+    }
+});
