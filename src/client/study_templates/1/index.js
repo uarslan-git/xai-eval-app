@@ -425,24 +425,36 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // --- Mockserver integration for diagnosis options, evidences, and heatmap overlay ---
+
+// Use backend diagnosis names
+const DIAGNOSIS_NAMES = [
+  'Healthy',
+  'Pneumonia',
+  'Pleural Effusion',
+  'Pulmonary Edema',
+  'Lung Nodule',
+  'Interstitial Lung Disease'
+];
+
 async function fetchDiagnosisOptions() {
-  // Example: hardcoded for demo, replace with API if needed
-  return ['A', 'B', 'C', 'D', 'E'];
+  return DIAGNOSIS_NAMES;
 }
 
-async function fetchEvidences(hypothesis) {
+async function fetchEvidences(diagnosis) {
   const res = await fetch('http://localhost:4000/api/evidences', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hypothesis })
+    body: JSON.stringify({ diagnosis })
   });
-  return (await res.json()).evidences;
+  const data = await res.json();
+  return { evidenceFor: data.evidenceFor, evidenceAgainst: data.evidenceAgainst };
 }
 
 async function fetchHeatmap(imageId) {
   const res = await fetch(`http://localhost:4000/api/heatmap/${imageId}`);
   return (await res.json()).heatmap;
 }
+
 
 function renderDiagnosisOptions(options) {
   const container = document.querySelector('.diagnosis-options');
@@ -458,11 +470,12 @@ function renderDiagnosisOptions(options) {
 
 function renderEvidences(evidences) {
   let html = '';
-  html += '<div><b>Evidence For:</b><ul>' + evidences.for.map(e => `<li>${e}</li>`).join('') + '</ul></div>';
-  html += '<div><b>Evidence Against:</b><ul>' + evidences.against.map(e => `<li>${e}</li>`).join('') + '</ul></div>';
+  html += '<div><b>Evidence For:</b><ul>' + (evidences.evidenceFor || []).map(e => `<li>${e}</li>`).join('') + '</ul></div>';
+  html += '<div><b>Evidence Against:</b><ul>' + (evidences.evidenceAgainst || []).map(e => `<li>${e}</li>`).join('') + '</ul></div>';
   const expl = document.querySelector('.explanation-card .explanation-text');
   if (expl) expl.innerHTML = html;
 }
+
 
 document.addEventListener('DOMContentLoaded', async function() {
   // Render diagnosis options

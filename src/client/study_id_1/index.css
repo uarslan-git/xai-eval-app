@@ -335,6 +335,7 @@ input[type="radio"] {
     width: 22px;
     height: 22px;
     border: 2px solid var(--white);
+    box-sizing: border-box;
     border-radius: 50%;
     margin-right: 12px;
     outline: none;
