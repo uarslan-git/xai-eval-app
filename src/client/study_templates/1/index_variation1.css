@@ -1,17 +1,21 @@
 :root {
-  --primary-blue: #2563eb;
-  --primary-blue-dark: #1e40af;
-  --primary-blue-light: #3b82f6;
-  --accent-blue: #60a5fa;
-  --light-blue: #93c5fd;
-  --dark-bg: #0f172a;
-  --card-bg: #1e293b;
-  --header-bg: #334155;
+  --primary-blue: #1d4ed8;
+  --primary-blue-dark: #1e3a8a;
+  --primary-blue-light: #2563eb;
+  --accent-blue: #3b82f6;
+  --light-blue: #60a5fa;
+  --dark-bg: #0a0f1d;
+  --card-bg: #162031;
+  --header-bg: #1e2a3f;
   --medium-gray: #94a3b8;
   --dark-text: #e2e8f0;
   --white: #ffffff;
   --border-color: #475569;
-  --shadow-color: rgba(37, 99, 235, 0.15);
+  --shadow-color: rgba(29, 78, 216, 0.15);
+  /* Replace red colors with blue theme */
+  --primary-red: #1d4ed8;
+  --primary-red-dark: #1e3a8a;
+  --accent-red: #3b82f6;
   --padding-sm: 0.75rem;
   --padding-md: 1.25rem;
   --padding-lg: 1.75rem;
@@ -44,7 +48,7 @@ body {
   height: 95vh;
   max-height: 900px;
   border-radius: var(--border-radius-md);
-  box-shadow: 0 15px 40px var(--shadow-color);
+  box-shadow: 0 8px 25px var(--shadow-color);
   overflow: hidden;
   background-color: var(--card-bg);
   transition: all 0.3s cubic-bezier(0.23, 1.01, 0.32, 1);
@@ -71,7 +75,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 3px 16px var(--shadow-color);
+  box-shadow: 0 2px 12px var(--shadow-color);
   z-index: 10;
 }
 .header-title {
@@ -83,12 +87,12 @@ body {
   text-shadow: 0 2px 8px rgba(96, 165, 250, 0.5);
 }
 .header-info-card {
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(29, 78, 216, 0.15);
   padding: var(--padding-sm) var(--padding-md);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
-  box-shadow: 0 1px 3px #e5393522;
-  border: 1px solid #fff3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(29, 78, 216, 0.3);
 }
 .header-info-card td {
   padding: 2px 8px;
@@ -124,10 +128,10 @@ body {
   background: linear-gradient(
     120deg,
     var(--card-bg) 80%,
-    var(--primary-blue-dark) 100%
+    var(--primary-blue) 100%
   );
   border-radius: var(--border-radius-md);
-  box-shadow: 0 8px 25px var(--shadow-color);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   padding: var(--padding-lg);
   display: flex;
   flex-direction: column;
@@ -139,11 +143,11 @@ body {
 }
 .card:hover {
   transform: translateY(-8px) scale(1.025);
-  box-shadow: 0 16px 40px #e5393533, 0 2px 8px #fff8;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 .card:active {
   transform: scale(0.98);
-  box-shadow: 0 2px 8px #e5393522;
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 .card-title {
   font-size: var(--font-size-lg);
@@ -169,7 +173,7 @@ body {
 }
 .warning-title {
   font-size: var(--font-size-lg);
-  color: var(--accent-red);
+  color: var(--accent-blue);
   margin-top: 0;
   margin-bottom: var(--margin-sm);
   display: flex;
@@ -288,7 +292,7 @@ body {
   justify-content: center;
   font-weight: 600;
   color: var(--white);
-  box-shadow: 0 4px 10px #e5393522;
+  box-shadow: 0 4px 10px var(--shadow-color);
 }
 .radio-label:hover {
   background: linear-gradient(
@@ -297,11 +301,11 @@ body {
     var(--primary-red)
   );
   transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 8px 18px #e5393533;
+  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.3);
 }
 .radio-label:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 6px #e5393522;
+  box-shadow: 0 2px 6px var(--shadow-color);
 }
 .healthy-label {
   background: linear-gradient(90deg, var(--accent-red), var(--primary-red));
@@ -357,16 +361,17 @@ input[type="radio"]:checked::before {
 .progress-container {
   flex-grow: 1;
   height: 35px;
-  background-color: #e5393533;
+  background-color: var(--dark-bg);
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   position: relative;
   margin-right: var(--padding-lg);
   max-width: 600px;
+  border: 1px solid var(--border-color);
 }
 .progress-bar {
   height: 100%;
-  background-color: var(--primary-red);
+  background-color: var(--accent-blue);
   width: 0%;
   border-radius: var(--border-radius-sm);
   transition: width 0.6s ease-out;
@@ -379,7 +384,7 @@ input[type="radio"]:checked::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: var(--white);
+  color: var(--accent-blue);
   font-weight: 500;
   font-size: var(--font-size-md);
   z-index: 1;
@@ -392,8 +397,8 @@ input[type="radio"]:checked::before {
 .nav-button {
   background: linear-gradient(
     90deg,
-    var(--primary-red),
-    var(--primary-red-dark)
+    var(--primary-blue),
+    var(--primary-blue-dark)
   );
   color: var(--white);
   border: none;
@@ -403,20 +408,20 @@ input[type="radio"]:checked::before {
   font-size: var(--font-size-md);
   font-weight: 600;
   transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-  box-shadow: 0 3px 8px #e5393522;
+  box-shadow: 0 3px 8px var(--shadow-color);
 }
 .nav-button:hover {
   background: linear-gradient(
     90deg,
-    var(--primary-red-dark),
-    var(--primary-red)
+    var(--primary-blue-dark),
+    var(--primary-blue)
   );
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 8px 18px #e5393533;
+  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.3);
 }
 .nav-button:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 6px #e5393522;
+  box-shadow: 0 2px 6px var(--shadow-color);
 }
 @media (max-width: 1024px) {
   .main-grid {
