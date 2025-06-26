@@ -441,13 +441,14 @@ async function fetchDiagnosisOptions() {
 }
 
 async function fetchEvidences(diagnosis) {
+  const imageId = '123'; // Replace with real image ID if available
   const res = await fetch('http://localhost:4000/api/evidences', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ diagnosis })
+    body: JSON.stringify({ diagnosis, imageId })
   });
   const data = await res.json();
-  return { evidenceFor: data.evidenceFor, evidenceAgainst: data.evidenceAgainst };
+  return { evidenceFor: data.evidenceFor, evidenceAgainst: data.evidenceAgainst, heatmap: data.heatmap, waterfall: data.waterfall };
 }
 
 async function fetchHeatmap(imageId) {
@@ -474,6 +475,42 @@ function renderEvidences(evidences) {
   html += '<div><b>Evidence Against:</b><ul>' + (evidences.evidenceAgainst || []).map(e => `<li>${e}</li>`).join('') + '</ul></div>';
   const expl = document.querySelector('.explanation-card .explanation-text');
   if (expl) expl.innerHTML = html;
+
+  // Render heatmap and waterfall below the main image
+  const container = document.querySelector('.x-ray-image-container');
+  if (container) {
+    let extra = document.getElementById('heatmap-waterfall-container');
+    if (!extra) {
+      extra = document.createElement('div');
+      extra.id = 'heatmap-waterfall-container';
+      extra.style.display = 'flex';
+      extra.style.justifyContent = 'center';
+      extra.style.gap = '24px';
+      extra.style.marginTop = '18px';
+      container.appendChild(extra);
+    }
+    extra.innerHTML = '';
+    if (evidences.heatmap) {
+      const heatmapImg = document.createElement('img');
+      heatmapImg.src = evidences.heatmap;
+      heatmapImg.alt = 'Heatmap';
+      heatmapImg.style.maxWidth = '220px';
+      heatmapImg.style.maxHeight = '180px';
+      heatmapImg.style.background = '#222';
+      heatmapImg.style.borderRadius = '10px';
+      extra.appendChild(heatmapImg);
+    }
+    if (evidences.waterfall) {
+      const waterfallImg = document.createElement('img');
+      waterfallImg.src = evidences.waterfall;
+      waterfallImg.alt = 'Waterfall Plot';
+      waterfallImg.style.maxWidth = '220px';
+      waterfallImg.style.maxHeight = '180px';
+      waterfallImg.style.background = '#222';
+      waterfallImg.style.borderRadius = '10px';
+      extra.appendChild(waterfallImg);
+    }
+  }
 }
 
 

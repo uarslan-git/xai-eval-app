@@ -1,62 +1,82 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors');
+const cors = require("cors");
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/heatmap/:imageId', (req, res) => {
+app.get("/api/heatmap/:imageId", (req, res) => {
   const { imageId } = req.params;
   res.json({
     imageId,
-    heatmap: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...'
+    heatmap: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
   });
 });
 
 // Diagnoses array with name, evidenceFor, evidenceAgainst
 const diagnoses = [
   {
-    name: 'Healthy',
-    evidenceFor: ['Clear lung fields', 'Normal heart size'],
-    evidenceAgainst: ['No abnormal shadows', 'No effusion']
+    name: "Healthy",
+    evidenceFor: ["Clear lung fields", "Normal heart size"],
+    evidenceAgainst: ["No abnormal shadows", "No effusion"],
   },
   {
-    name: 'Pneumonia',
-    evidenceFor: ['Strong shadow in upper lobe', 'High opacity'],
-    evidenceAgainst: ['No pleural effusion', 'Normal heart size']
+    name: "Pneumonia",
+    evidenceFor: ["Strong shadow in upper lobe", "High opacity"],
+    evidenceAgainst: ["No pleural effusion", "Normal heart size"],
   },
   {
-    name: 'Pleural Effusion',
-    evidenceFor: ['Clear costophrenic angle', 'No consolidation'],
-    evidenceAgainst: ['Diffuse opacity', 'Blunted angle']
+    name: "Pleural Effusion",
+    evidenceFor: ["Clear costophrenic angle", "No consolidation"],
+    evidenceAgainst: ["Diffuse opacity", "Blunted angle"],
   },
   {
-    name: 'Pulmonary Edema',
-    evidenceFor: ['Increased vascular markings', 'Patchy infiltrates'],
-    evidenceAgainst: ['No cardiomegaly', 'No interstitial thickening']
+    name: "Pulmonary Edema",
+    evidenceFor: ["Increased vascular markings", "Patchy infiltrates"],
+    evidenceAgainst: ["No cardiomegaly", "No interstitial thickening"],
   },
   {
-    name: 'Lung Nodule',
-    evidenceFor: ['Well-defined nodule', 'No calcification'],
-    evidenceAgainst: ['Multiple nodules absent', 'No lymphadenopathy']
+    name: "Lung Nodule",
+    evidenceFor: ["Well-defined nodule", "No calcification"],
+    evidenceAgainst: ["Multiple nodules absent", "No lymphadenopathy"],
   },
   {
-    name: 'Interstitial Lung Disease',
-    evidenceFor: ['Diffuse reticular pattern', 'Honeycombing'],
-    evidenceAgainst: ['No pleural plaques', 'No volume loss']
-  }
+    name: "Interstitial Lung Disease",
+    evidenceFor: ["Diffuse reticular pattern", "Honeycombing"],
+    evidenceAgainst: ["No pleural plaques", "No volume loss"],
+  },
 ];
 
-app.post('/api/evidences', (req, res) => {
-  const { diagnosis } = req.body;
-  const found = diagnoses.find(d => d.name === diagnosis);
+app.post("/api/evidences", (req, res) => {
+  const { diagnosis, imageId } = req.body;
+  const found = diagnoses.find((d) => d.name === diagnosis);
+
+  // Generate more realistic mock base64 images for heatmap and waterfall
+  const generateMockImage = (type, diagnosis, imageId) => {
+    // This is a simple 1x1 pixel PNG in base64 - in real implementation, these would be actual visualizations
+    const baseImage =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+    return `data:image/png;base64,${baseImage}`;
+  };
+
+  const heatmap = generateMockImage("heatmap", diagnosis, imageId);
+  const waterfall = generateMockImage("waterfall", diagnosis, imageId);
+
   if (found) {
-    res.json({ diagnosis: found.name, evidenceFor: found.evidenceFor, evidenceAgainst: found.evidenceAgainst });
+    res.json({
+      diagnosis: found.name,
+      evidenceFor: found.evidenceFor,
+      evidenceAgainst: found.evidenceAgainst,
+      heatmap,
+      waterfall,
+    });
   } else {
     res.json({
-      diagnosis: 'Unknown',
-      evidenceFor: ['General finding 1', 'General finding 2'],
-      evidenceAgainst: ['General counter 1', 'General counter 2']
+      diagnosis: "Unknown",
+      evidenceFor: ["General finding 1", "General finding 2"],
+      evidenceAgainst: ["General counter 1", "General counter 2"],
+      heatmap,
+      waterfall,
     });
   }
 });

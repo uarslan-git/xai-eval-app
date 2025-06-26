@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XAI Eval App Preview</title>
+    <style>
+      :root {
+        --primary-blue: #2563eb;
+        --primary-blue-dark: #1e40af;
+        --primary-blue-light: #3b82f6;
+        --accent-blue: #60a5fa;
+        --dark-bg: #0f172a;
+        --dark-card: #1e293b;
+        --dark-text: #e2e8f0;
+        --gray-text: #94a3b8;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--dark-bg),
+          var(--primary-blue-dark)
+        );
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin: 0;
+        color: var(--dark-text);
+      }
+
+      .preview-container {
+        width: 400px;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0px 0px 30px rgba(37, 99, 235, 0.3);
+        background: var(--dark-card);
+        border: 1px solid var(--primary-blue);
+      }
+
+      h1 {
+        color: var(--accent-blue);
+        margin-bottom: 20px;
+      }
+
+      .radio-example {
+        margin: 20px 0;
+      }
+
+      .radio-label {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 10px 0;
+        background: linear-gradient(
+          90deg,
+          var(--accent-blue),
+          var(--primary-blue)
+        );
+        color: var(--dark-text);
+        font-weight: 600;
+        border: 1px solid var(--primary-blue);
+      }
+
+      .radio-label:hover {
+        background: linear-gradient(
+          90deg,
+          var(--primary-blue-dark),
+          var(--primary-blue)
+        );
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      }
+
+      input[type="radio"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--accent-blue);
+        box-sizing: border-box;
+        border-radius: 50%;
+        margin-right: 12px;
+        outline: none;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+        background-color: var(--dark-card);
+      }
+
+      input[type="radio"]:checked {
+        background-color: var(--accent-blue);
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.4);
+      }
+
+      input[type="radio"]:checked::before {
+        content: "";
+        display: block;
+        width: 8px;
+        height: 8px;
+        background-color: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .color-preview {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+      }
+
+      .color-sample {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 2px solid var(--accent-blue);
+      }
+
+      .primary {
+        background: var(--primary-blue);
+      }
+      .primary-dark {
+        background: var(--primary-blue-dark);
+      }
+      .accent {
+        background: var(--accent-blue);
+      }
+      .card {
+        background: var(--dark-card);
+      }
+
+      .links {
+        margin-top: 30px;
+      }
+
+      .link {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 5px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-blue),
+          var(--primary-blue-light)
+        );
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+
+      .link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-container">
+      <h1>XAI Eval App - Dark Mode Preview</h1>
+
+      <p>New blueish dark theme with improved design</p>
+
+      <div class="color-preview">
+        <div class="color-sample primary" title="Primary Blue"></div>
+        <div class="color-sample primary-dark" title="Primary Dark"></div>
+        <div class="color-sample accent" title="Accent Blue"></div>
+        <div class="color-sample card" title="Card Background"></div>
+      </div>
+
+      <div class="radio-example">
+        <p>Fixed Round Radio Buttons:</p>
+        <label class="radio-label">
+          <input type="radio" name="test" value="healthy" checked /> Healthy
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="test" value="unhealthy" /> OCDegen
+        </label>
+      </div>
+
+      <div class="links">
+        <a href="src/client/index.html" class="link">Main App</a>
+        <a href="src/client/study_id_1/index.html" class="link">Study View</a>
+      </div>
+    </div>
+  </body>
+</html>

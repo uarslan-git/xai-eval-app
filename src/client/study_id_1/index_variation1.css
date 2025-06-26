@@ -1,14 +1,17 @@
 :root {
-  --primary-red: #e53935;
-  --primary-red-dark: #b71c1c;
-  --primary-red-light: #ffebee;
-  --accent-red: #ff1744;
-  --light-bg: #fff5f7;
-  --medium-gray: #7a2323;
-  --dark-text: #2d0101;
-  --white: #fff;
-  --border-color: #ffdde0;
-  --shadow-color: rgba(229,57,53,0.10);
+  --primary-blue: #2563eb;
+  --primary-blue-dark: #1e40af;
+  --primary-blue-light: #3b82f6;
+  --accent-blue: #60a5fa;
+  --light-blue: #93c5fd;
+  --dark-bg: #0f172a;
+  --card-bg: #1e293b;
+  --header-bg: #334155;
+  --medium-gray: #94a3b8;
+  --dark-text: #e2e8f0;
+  --white: #ffffff;
+  --border-color: #475569;
+  --shadow-color: rgba(37, 99, 235, 0.15);
   --padding-sm: 0.75rem;
   --padding-md: 1.25rem;
   --padding-lg: 1.75rem;
@@ -24,9 +27,9 @@
 html, body {
   margin: 0;
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-  background: linear-gradient(135deg, var(--primary-red-light), var(--white) 80%);
+  background: linear-gradient(135deg, var(--dark-bg), var(--primary-blue-dark));
   min-height: 100vh;
-  color: var(--medium-gray);
+  color: var(--dark-text);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -42,7 +45,7 @@ html, body {
   border-radius: var(--border-radius-md);
   box-shadow: 0 15px 40px var(--shadow-color);
   overflow: hidden;
-  background-color: var(--white);
+  background-color: var(--card-bg);
   transition: all 0.3s cubic-bezier(.23,1.01,.32,1);
   animation: fadeInMain 1.1s cubic-bezier(.23,1.01,.32,1);
 }
@@ -51,13 +54,13 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 .app-header {
-  background: linear-gradient(90deg, var(--primary-red), var(--primary-red-dark));
-  color: var(--white);
+  background: linear-gradient(90deg, var(--header-bg), var(--primary-blue-dark));
+  color: var(--dark-text);
   padding: var(--padding-md) var(--padding-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 3px 16px #e5393522;
+  box-shadow: 0 3px 16px var(--shadow-color);
   z-index: 10;
 }
 .header-title {
@@ -65,8 +68,8 @@ html, body {
   font-size: var(--font-size-xl);
   letter-spacing: 1.5px;
   font-weight: 700;
-  color: var(--white);
-  text-shadow: 0 2px 8px #fff8;
+  color: var(--accent-blue);
+  text-shadow: 0 2px 8px rgba(96, 165, 250, 0.5);
 }
 .header-info-card {
   background-color: rgba(255, 255, 255, 0.18);
@@ -79,19 +82,19 @@ html, body {
 .header-info-card td {
   padding: 2px 8px;
   text-align: left;
-  color: var(--white);
+  color: var(--dark-text);
 }
 .unhealthy {
-  color: var(--primary-red);
+  color: var(--primary-blue);
   font-weight: bold;
 }
 .healthy {
-  color: var(--accent-red);
+  color: var(--accent-blue);
   font-weight: bold;
 }
 .main-content {
   padding: var(--padding-md);
-  background-color: var(--light-bg);
+  background-color: var(--dark-bg);
   overflow-y: auto;
 }
 .main-grid {
@@ -106,7 +109,7 @@ html, body {
   gap: var(--padding-md);
 }
 .card {
-  background: linear-gradient(120deg, var(--white) 80%, var(--primary-red-light) 100%);
+  background: linear-gradient(120deg, var(--card-bg) 80%, var(--primary-blue-dark) 100%);
   border-radius: var(--border-radius-md);
   box-shadow: 0 8px 25px var(--shadow-color);
   padding: var(--padding-lg);
@@ -115,6 +118,7 @@ html, body {
   overflow: hidden;
   transition: transform 0.35s cubic-bezier(.23,1.01,.32,1), box-shadow 0.35s cubic-bezier(.23,1.01,.32,1);
   will-change: transform, box-shadow;
+  border: 1px solid var(--border-color);
 }
 .card:hover {
   transform: translateY(-8px) scale(1.025);
@@ -126,7 +130,7 @@ html, body {
 }
 .card-title {
   font-size: var(--font-size-lg);
-  color: var(--primary-red-dark);
+  color: var(--primary-blue-dark);
   margin-top: 0;
   margin-bottom: var(--margin-md);
   border-bottom: 1.5px solid var(--border-color);
