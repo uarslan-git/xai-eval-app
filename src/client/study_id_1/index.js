@@ -9,12 +9,12 @@ async function loadHeatmapGallery() {
   row.style.justifyContent = 'center';
   row.style.gap = '20px';
   try {
-    const res = await fetch('/api/heatmaps');
+    const res = await fetch('http://localhost:4000/api/heatmaps');
     const data = await res.json();
     if (Array.isArray(data.images)) {
       data.images.forEach(filename => {
         const img = document.createElement('img');
-        img.src = `/heatmaps/${filename}`;
+        img.src = `http://localhost:4000/heatmaps/${filename}`;
         img.alt = filename;
         img.style.maxWidth = '200px';
         img.style.borderRadius = '8px';
