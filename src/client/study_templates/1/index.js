@@ -476,20 +476,10 @@ function renderEvidences(evidences) {
   const expl = document.querySelector('.explanation-card .explanation-text');
   if (expl) expl.innerHTML = html;
 
-  // Render heatmap and waterfall below the main image
-  const container = document.querySelector('.x-ray-image-container');
-  if (container) {
-    let extra = document.getElementById('heatmap-waterfall-container');
-    if (!extra) {
-      extra = document.createElement('div');
-      extra.id = 'heatmap-waterfall-container';
-      extra.style.display = 'flex';
-      extra.style.justifyContent = 'center';
-      extra.style.gap = '24px';
-      extra.style.marginTop = '18px';
-      container.appendChild(extra);
-    }
-    extra.innerHTML = '';
+  // Render heatmap in the new heatmap-container next to the x-ray image
+  const heatmapContainer = document.querySelector('.heatmap-container');
+  if (heatmapContainer) {
+    heatmapContainer.innerHTML = '';
     if (evidences.heatmap) {
       const heatmapImg = document.createElement('img');
       heatmapImg.src = evidences.heatmap;
@@ -498,7 +488,7 @@ function renderEvidences(evidences) {
       heatmapImg.style.maxHeight = '180px';
       heatmapImg.style.background = '#222';
       heatmapImg.style.borderRadius = '10px';
-      extra.appendChild(heatmapImg);
+      heatmapContainer.appendChild(heatmapImg);
     }
     if (evidences.waterfall) {
       const waterfallImg = document.createElement('img');
@@ -508,7 +498,7 @@ function renderEvidences(evidences) {
       waterfallImg.style.maxHeight = '180px';
       waterfallImg.style.background = '#222';
       waterfallImg.style.borderRadius = '10px';
-      extra.appendChild(waterfallImg);
+      heatmapContainer.appendChild(waterfallImg);
     }
   }
 }

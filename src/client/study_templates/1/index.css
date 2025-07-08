@@ -253,11 +253,22 @@ body {
   opacity: 0.9;
 }
 
+
+.x-ray-image-heatmap-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  height: 400px;
+  min-height: 300px;
+  gap: 24px;
+}
+
 .x-ray-image-container {
   width: 100%;
-  height: 400px; /* Fixed height for better proportions */
-  min-height: 300px;
-  flex-grow: 1;
+  max-width: 60%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -266,6 +277,19 @@ body {
   overflow: hidden;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
   border: 2px solid var(--border-color);
+}
+
+.heatmap-container {
+  width: 220px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--dark-bg);
+  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--border-color);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+  overflow: hidden;
 }
 
 .x-ray-image {
