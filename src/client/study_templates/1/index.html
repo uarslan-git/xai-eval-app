@@ -176,6 +176,7 @@
             </section>
           </div>
         </div>
+        <div id="heatmap-gallery" style="margin:40px 0;"></div>
       </main>
 
       <footer class="app-footer">
@@ -189,5 +190,36 @@
         </div>
       </footer>
     </div>
+    <div id="heatmap-gallery" style="margin:40px 0;"></div>
   </body>
 </html>
+<script>
+// Dynamically fetch and render heatmaps next to the patient-x-ray-image
+window.addEventListener('DOMContentLoaded', async function () {
+  const xrayImg = document.getElementById('patient-x-ray-image');
+  if (!xrayImg) return;
+  const container = xrayImg.parentElement;
+  try {
+    const res = await fetch('/api/heatmaps');
+    const data = await res.json();
+    if (Array.isArray(data.images)) {
+      data.images.forEach(async filename => {
+        const resp = await fetch(`/api/heatmap/${filename}`);
+        const imgData = await resp.json();
+        if (imgData.heatmap) {
+          const img = document.createElement('img');
+          img.src = imgData.heatmap;
+          img.alt = filename;
+          img.style.maxWidth = '200px';
+          img.style.marginLeft = '16px';
+          img.style.borderRadius = '8px';
+          img.style.boxShadow = '0 2px 8px #0006';
+          container.appendChild(img);
+        }
+      });
+    }
+  } catch (e) {
+    // Optionally handle error
+  }
+});
+</script>

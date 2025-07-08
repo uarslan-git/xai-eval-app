@@ -1,9 +1,29 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const fs = require("fs");
+
+const path = require("path");
 
 app.use(cors());
 app.use(express.json());
+
+// Serve heatmap images statically from img/heatmaps at /heatmaps
+app.use('/heatmaps', express.static(path.join(__dirname, 'img/heatmaps')));
+
+// Endpoint to list all heatmap images
+app.get('/api/heatmaps', (req, res) => {
+  const dir = path.join(__dirname, 'img/heatmaps');
+  fs.readdir(dir, (err, files) => {
+    if (err) {
+      res.status(500).json({ error: 'Could not list heatmap images' });
+      return;
+    }
+    // Filter for image files only (png, jpg, jpeg, gif)
+    const images = files.filter(f => /\.(png|jpg|jpeg|gif)$/i.test(f));
+    res.json({ images });
+  });
+});
 
 app.get("/api/heatmap/:imageId", (req, res) => {
   const { imageId } = req.params;

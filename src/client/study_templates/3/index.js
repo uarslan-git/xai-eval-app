@@ -3,6 +3,39 @@
  *
  * Author: V Natarjan
  */
+// --- Heatmap Gallery Logic (Dynamic) ---
+async function loadHeatmapGallery() {
+  const gallery = document.getElementById('heatmap-gallery');
+  if (!gallery) return;
+  gallery.innerHTML = '<h2 style="color:#e2e8f0;">Heatmap Gallery</h2>';
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.flexWrap = 'wrap';
+  row.style.justifyContent = 'center';
+  row.style.gap = '20px';
+  try {
+    const res = await fetch('/api/heatmaps');
+    const data = await res.json();
+    if (Array.isArray(data.images)) {
+      data.images.forEach(filename => {
+        const img = document.createElement('img');
+        img.src = `/heatmaps/${filename}`;
+        img.alt = filename;
+        img.style.maxWidth = '200px';
+        img.style.borderRadius = '8px';
+        img.style.boxShadow = '0 2px 8px #0006';
+        row.appendChild(img);
+      });
+    } else {
+      row.innerHTML = '<span style="color:#e2e8f0;">No heatmap images found.</span>';
+    }
+  } catch (e) {
+    row.innerHTML = '<span style="color:#e2e8f0;">Failed to load heatmap images.</span>';
+  }
+  gallery.appendChild(row);
+}
+
+window.addEventListener('DOMContentLoaded', loadHeatmapGallery);
 
 
 let input = null;
