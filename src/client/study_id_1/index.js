@@ -420,7 +420,7 @@ function csv_json_get_main_attributes(page_nr)
     l_x_ray_loc    = input.X_RAY_LOCATION[index];
     l_true_diag = input.TRUE_DIAG[index];
     l_suggested_diag = input.SUGGESTED_DIAG[index];
-    l_image = "img/" + input.X_RAY_IMAGE[index];
+    l_image = "/study_id_1/img/" + input.X_RAY_IMAGE[index];
     attributes = [l_patient_id, l_image, l_x_ray_loc, l_true_diag, l_suggested_diag]
     return attributes;
 }
