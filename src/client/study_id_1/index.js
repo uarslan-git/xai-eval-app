@@ -456,7 +456,15 @@ async function init_page()
     let participant_id = url_params.participant_id;
     let study_id = url_params.study_id;
     let page_nr = get_page_nr_from_url();
-    let total_pages = parseInt(url_params.total_pages) || csv_json_get_total_page_count();
+    let total_pages = parseInt(url_params.total_pages);
+
+    // If total_pages is not in the URL, calculate it and update the URL
+    if (isNaN(total_pages) || total_pages === 0) {
+        total_pages = csv_json_get_total_page_count();
+        // Update the URL with total_pages
+        update_study_url(participant_id, study_id, url_params.study_type, page_nr, total_pages);
+        return; // Exit to allow the page to reload with the correct URL
+    }
 
     db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr);
     csv_json_get_all_attributes_and_set_in_html_page(page_nr, total_pages);
