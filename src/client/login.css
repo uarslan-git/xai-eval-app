@@ -1,0 +1,120 @@
+:root {
+  --primary-pink: #ffb6c1; /* Light Pink */
+  --primary-pink-dark: #ff8f9f; /* Darker Pink */
+  --primary-pink-light: #ffe4e1; /* Misty Rose */
+  --accent-color: #f06292; /* Material Pink */
+  --light-bg: #fff0f5; /* Lavender Blush */
+  --dark-text: #5d4037; /* Brown for text */
+  --white: #ffffff;
+  --border-color: #ffcdd2; /* Light pink border */
+  --shadow-color: rgba(240, 98, 146, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  background-color: var(--light-bg);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Plexus Background */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(45deg, var(--primary-pink-light) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--primary-pink-light) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--primary-pink-light) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--primary-pink-light) 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+  opacity: 0.3;
+  z-index: -1;
+  animation: plexus 20s linear infinite;
+}
+
+@keyframes plexus {
+  from { background-position: 0 0, 0 30px, 30px -30px, -30px 0px; }
+  to { background-position: 0 -60px, 0 -30px, 30px -90px, -30px -60px; }
+}
+
+h1 {
+  font-size: 28px;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  color: var(--accent-color);
+  text-shadow: 1px 1px 3px var(--shadow-color);
+}
+
+.container {
+  color: var(--dark-text);
+  width: 350px;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0px 0px 30px var(--shadow-color);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: var(--white);
+  color: var(--dark-text);
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+input::placeholder {
+  color: #c5aab3;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--shadow-color);
+}
+
+button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary-pink), var(--primary-pink-dark));
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+  background: linear-gradient(135deg, var(--primary-pink-dark), var(--accent-color));
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px var(--shadow-color);
+}

@@ -1,489 +1,298 @@
 :root {
-  /*My Browser Inner Width and Height: 1484px  x  756px*/
-  /*HD Screen Resolution : 1920px x 1080px*/
-  --fixed-screen-width: 1420px; /* 1920px  */
-  --fixed-screen-height: 700px; /* 1080px */
-  --app-width: calc(var(--fixed-screen-width) * (1 - 0)); /*reduce app-width */
-  --app-height: calc(
-    var(--fixed-screen-height) * (1 - 0)
-  ); /*reduce app-height */
-
-  --blue: #1d4ed8;
+  --primary-pink: #ffb6c1; /* Light Pink */
+  --primary-pink-dark: #ff8f9f; /* Darker Pink */
+  --primary-pink-light: #ffe4e1; /* Misty Rose */
+  --accent-color: #f06292; /* Material Pink */
+  --light-bg: #fff0f5; /* Lavender Blush */
+  --dark-text: #5d4037; /* Brown for text */
   --white: #ffffff;
-  --orange: #1d4ed8;
-  --green: #4caf50;
-  --bg-green: #1d4ed8;
-  --bg-gray: #162031;
-  --dark-blue-bg: #14213d;
-  --dark-blue-accent: #1a237e;
-  --dark-blue-text: #e0e6f7;
-  --border1: 2px solid black;
-  --border2: 2px solid black;
-  /*Disable Border*/
-  --border1: none;
-  --border2: none;
+  --border-color: #ffcdd2; /* Light pink border */
+  --shadow-color: rgba(240, 98, 146, 0.2);
 
-  /*Viki_Commment: Only the following has to be modified between 3CARDS, 4CARDS, 5CARDS and 6CARDS layout*/
-  --grid-row1-ncolumns: 5; /* viki_comment: only change this value to increase or decrease columns in first row */
-  --grid-template-row1-columns: repeat(
-    var(--grid-row1-ncolumns),
-    1fr
-  ); /* Use var() inside repeat() */
-
-  --grid-row2-ncolumns: 2;
-  --grid-template-row2-columns: repeat(
-    var(--grid-row2-ncolumns),
-    1fr
-  ); /* Use var() inside repeat() */
-  /* --grid-template-row2-columns: calc(var(--app-width) * 0.6) calc(var(--app-width) * 0.39);  */
-
-  /* Calculate the reduced values */
-  --header-height: calc(var(--app-height) * 0.1);
-  --body-height: calc(var(--app-height) * 0.75);
-  --footer-height: calc(var(--app-height) * 0.1);
-
-  --row1-height: calc(var(--body-height) * 0.59);
-  --row2-height: calc(var(--body-height) * 0.39);
-
-  --row1-card-height: calc(var(--row1-height) * 0.9);
-  --row2-card-height: calc(var(--row2-height) * 0.9);
-  --warning-title-y-placement: 6px;
-  --warning-text-y-placement: 5px;
-  --concept-based-explanation-text-y-placement: -80px;
+  --padding-sm: 0.75rem;
+  --padding-md: 1.25rem;
+  --padding-lg: 1.75rem;
+  --margin-sm: 0.5rem;
+  --margin-md: 1rem;
+  --border-radius-sm: 8px;
+  --border-radius-md: 18px;
+  --font-size-sm: 0.95rem;
+  --font-size-md: 1.08rem;
+  --font-size-lg: 1.35rem;
+  --font-size-xl: 2.1rem;
 }
 
 html,
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #0a0f1d, #1e3a8a);
-  /*overflow: hidden;*/ /* Prevents scrolling */
-  width: 100vw; /* 100% of viewport width */
-  height: 100vh; /* 100% of viewport height */
-  margin: 0;
+  font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+  background-color: var(--light-bg);
+  min-height: 100vh;
+  color: var(--dark-text);
+  display: flex;
   justify-content: center;
   align-items: center;
-  display: flex;
+  overflow: hidden;
 }
 
-.fixed-page-dimension {
-  display: grid;
-  max-width: var(--app-width); /* Reduced width */
-  max-height: var(--app-height); /* Reduced height */
-  margin: 0 auto; /* Centers the content horizontally */
-  width: 100%; /* Ensures it scales on smaller screens */
-  grid-template-rows: var(--header-height) var(--body-height) var(
-      --footer-height
-    );
-  grid-template-columns: auto;
-}
-
-header {
-  position: relative;
-  background: linear-gradient(
-    90deg,
-    var(--dark-blue-bg),
-    var(--dark-blue-accent)
-  );
-  color: var(--dark-blue-text);
-  padding: 1rem;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(20, 33, 61, 0.25);
-}
-
-header > h1 {
-  align-items: center;
-  justify-content: left;
-  text-align: left;
-  margin-top: 8px;
-}
-
-.header-info {
+/* Plexus Background */
+body::before {
+  content: "";
   position: absolute;
-  top: 12px;
-  right: 60px;
-  background: rgba(29, 78, 216, 0.2);
-  color: var(--dark-blue-text);
-  padding: 5px 5px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.15);
-  border: 1px solid rgba(29, 78, 216, 0.4);
-}
-
-.header-info table {
-  border-collapse: collapse;
-  border: 1px solid #ccc; /* Border for the entire table */
-}
-
-.header-info td {
-  padding: 0px 2px;
-  text-align: left;
-  border: 1px solid #ccc; /* Border for individual cells */
-}
-
-.unhealthy {
-  color: #1d4ed8;
-  background: var(--dark-blue-bg);
-  font-weight: bold;
-  border-radius: 4px;
-  padding: 2px 8px;
-}
-
-.healthy {
-  color: var(--green); /* Red color for Unhealthy */
-  font-weight: bold;
-}
-
-main {
-  position: relative;
-  display: grid;
-  /* 60% 38%; */ /* Adjust the height of row1 and row2*/
-  grid-template-rows:
-    calc(var(--body-height) * 0.6) /* 10% of --app-height */
-    calc(var(--body-height) * 0.3); /* 10% of --app-height */
-  column-gap: 1px; /* 10px gap between columns */
-  row-gap: 1px; /* 5px gap between rows */
-  padding: 0.1rem;
-  background: #f4f4f9;
-  overflow-y: hidden;
-  /*viki_comment: The following Disable : For the main columns to be full length*/
-  /*
-    align-items: center;
-    justify-content: center;
-    */
-}
-
-.main-row1 {
-  display: grid;
-  background: none;
-  border-radius: 8px;
-  grid-template-columns: var(--grid-template-row1-columns);
-  height: var(--row1-height); /* Fixed height */
-  border: var(--border1);
-  overflow: hidden;
-  column-gap: 5px;
-  padding: 1rem;
-  align-items: center;
-  justify-content: center;
-  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
-}
-
-.main-row2 {
-  display: grid;
-  background: none;
-  border-radius: 8px;
-  grid-template-columns: var(--grid-template-row2-columns); /*60% 39%*/
-  height: var(--row2-height); /* Fixed height */
-  border: var(--border2);
-  overflow: hidden;
-  column-gap: 1px;
-  padding-left: 5px;
-  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
-}
-
-/* Card Styles */
-.card-row1-col2-3-4-5 {
-  display: grid;
-  width: 100%; /* Matches the width of the column */
-  gap: 1px; /* 5px gap between elements */
-
-  height: var(--row1-card-height); /* Fixed height */
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  grid-template-rows: 10% 60% 30%; /* Row heights as specified */
-  border: 1px solid #ccc; /* Border around the entire card */
-  overflow: hidden;
-}
-
-/* First Row - Patient ID */
-.card-row1-col2-3-4-5 .title {
-  color: var(--white);
-  background: transparent;
-  display: flex;
-  text-align: left;
-  margin-left: 5px;
-  justify-content: left;
-  padding-left: 8px;
-  align-items: center;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-/* Second Row - Image */
-.card-row1-col2-3-4-5 .image {
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: none;
-  object-fit: contain;
-  display: block;
-  border-bottom: none;
-  justify-content: center;
-  align-items: center;
+  background:
+    linear-gradient(45deg, var(--primary-pink-light) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--primary-pink-light) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--primary-pink-light) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--primary-pink-light) 75%);
+  background-size: 60px 60px;
+  background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+  opacity: 0.3;
+  z-index: -1;
+  animation: plexus 20s linear infinite;
 }
 
-/* Third Row - Text */
-.card-row1-col2-3-4-5 .caption {
-  padding-left: 8px;
-  background: none;
-  padding-top: 0px;
+@keyframes plexus {
+  from { background-position: 0 0, 0 30px, 30px -30px, -30px 0px; }
+  to { background-position: 0 -60px, 0 -30px, 30px -90px, -30px -60px; }
+}
+
+.app-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 95vw;
+  max-width: 1440px;
+  height: 95vh;
+  max-height: 900px;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 8px 35px var(--shadow-color);
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  animation: fadeInMain 1.1s cubic-bezier(0.23, 1.01, 0.32, 1);
+}
+
+@keyframes fadeInMain {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header Styles */
+.app-header {
+  background: linear-gradient(90deg, var(--primary-pink), var(--primary-pink-dark));
+  color: var(--white);
+  padding: var(--padding-md) var(--padding-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 3px 15px var(--shadow-color);
+  z-index: 10;
+}
+
+.header-title {
+  color: var(--white);
+  font-size: var(--font-size-xl);
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.header-info-card {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: var(--padding-sm) var(--padding-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Main Content Styles */
+.main-content {
+  padding: var(--padding-md);
   overflow-y: auto;
-  font-size: 0.9rem;
-  color: #555;
-  align-items: center;
-  justify-content: center;
-}
-.card-row1-col2-3-4-5 .caption p {
-  /*vertical horizantal*/
-  margin: 8px 0;
 }
 
-.main-row2 .user-diagnosis {
-  color: var(--dark-blue-text);
-  background: var(--dark-blue-bg);
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  margin-top: 60px; /*Move radio button up / down*/
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(20, 33, 61, 0.1);
-}
-
-.main-row2 .user-diagnosis .title {
-  text-align: center;
-  font-size: 1.2rem; /* Larger text size */
-  font-weight: bold; /* Make it bold */
-  margin-bottom: 10px; /* Space between the text and radio buttons */
-}
-
-.main-row2 .user-diagnosis .rectangle {
-  display: flex;
-  gap: 0.5rem; /* Small gap between radio buttons */
-  justify-content: center;
-  align-items: center;
-}
-
-.main-row2 .user-diagnosis .rectangle label {
-  display: inline-block;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.main-row2 .user-diagnosis .rectangle input[type="radio"] {
-  margin-right: 5px; /* Space between radio button and label text */
-}
-
-.main-row2 .user-diagnosis .rectangle .healthy-label {
-  background-color: var(--green); /* Green background for Healthy */
-  color: white;
-}
-
-.main-row2 .user-diagnosis .rectangle .unhealthy-label {
-  background-color: var(--orange); /* Orange background for Unhealthy */
-  color: white;
-}
-
-footer {
-  position: relative;
-  background: var(--bg-gray);
-  color: white;
-  text-align: center;
-  padding: 1rem;
-}
-
-footer .nav-buttons {
-  position: absolute;
-  /*distance from bottom*/
-  bottom: 30px;
-  right: 10px;
-  display: flex;
-  gap: 0.5rem;
-}
-
-footer .nav-buttons button {
-  background: var(--green);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-footer .nav-buttons button:hover {
-  background: #45a049;
-}
-
-footer .progress-bar-container {
-  position: absolute;
-  bottom: 30px; /* Adjusts the distance from the bottom of the footer */
-  left: 50%;
-  transform: translateX(-50%); /* Centers the bar horizontally */
-  width: 500px;
-  height: 30px;
-  background-color: #555; /* Background color of the progress bar */
-  border-radius: 5px; /* Rounded corners for the container */
-  overflow: hidden; /* Ensures text stays within the bar */
-}
-
-footer .progress-bar {
-  position: absolute;
-  display: flex;
-  width: 50%; /* Set the progress here */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--padding-md);
   height: 100%;
-  background-color: var(--green); /* Progress color */
-  border-radius: 5px; /* Rounded corners for the progress bar */
-  align-items: center;
-  justify-content: center; /* Center text horizontally */
-  overflow: hidden; /* Prevents overflow of text */
-  white-space: nowrap; /* Prevents text from wrapping */
+}
+
+.left-panel,
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding-md);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 8px 25px var(--shadow-color);
+  padding: var(--padding-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.23, 1.01, 0.32, 1), box-shadow 0.35s cubic-bezier(0.23, 1.01, 0.32, 1);
+  will-change: transform, box-shadow;
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.025);
+  box-shadow: 0 16px 40px var(--shadow-color);
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  color: var(--accent-color);
+  margin-top: 0;
+  margin-bottom: var(--margin-md);
+  border-bottom: 1.5px solid var(--border-color);
+  padding-bottom: var(--padding-sm);
+  font-weight: 700;
+}
+
+/* X-Ray Card */
+.x-ray-card {
+  flex-grow: 1;
+  padding: var(--padding-md);
+}
+
+.x-ray-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--padding-sm);
+  height: 100%;
+  width: 100%;
+}
+
+.grid-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 4px 15px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.grid-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px var(--shadow-color);
+  z-index: 10;
+}
+
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.grid-item-main {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.grid-item-waterfall {
+  grid-column: span 4;
+}
+
+/* Diagnosis options */
+.user-diagnosis-card {
   text-align: center;
 }
 
-footer .progress-text {
+.diagnosis-options {
+  display: flex;
+  gap: var(--padding-md);
+  justify-content: center;
+  width: 100%;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  padding: var(--padding-sm) var(--padding-lg);
+  border-radius: 50px; /* More rounded buttons */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-grow: 1;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--dark-text);
+  background: var(--white);
+  border: 2px solid var(--border-color);
+}
+
+.radio-label:hover {
+  background: var(--primary-pink-light);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px var(--shadow-color);
+}
+
+input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  margin-right: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: var(--white);
+}
+
+input[type="radio"]:checked {
+  background-color: var(--accent-color);
+  border-color: var(--primary-pink-dark);
+}
+
+input[type="radio"]:checked::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  background-color: var(--white);
+  border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
-  font-weight: bold;
-  font-size: 0.9rem;
-  pointer-events: none; /* Makes the text unclickable */
 }
 
-/* Text Card Styles */
-.card-row1-col1 {
+/* Footer Styles */
+.app-footer {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: var(--padding-md) var(--padding-lg);
   display: flex;
-  width: 100%; /* Ensure card width matches the width of column 2 */
-  gap: 1px; /* 5px gap between elements */
-  padding-left: 15px;
-  padding-top: 15px;
-  height: var(--row1-card-height); /* Fixed height */
-  box-sizing: border-box; /* Ensures padding and border are included in width */
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-.card-row2-col1 {
-  display: grid;
-  gap: 1px; /* 5px gap between elements */
-  width: 97.5%; /* Ensure card width matches the width of column 2 */
-  height: var(--row2-card-height); /* Fixed height */
-  background: linear-gradient(120deg, var(--bg-gray) 80%, var(--blue) 100%);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #ccc; /* Border around the entire card */
-  margin-left: 10px;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
 }
 
-.card-row2-col2 {
-  display: grid;
-  gap: 1px; /* 5px gap between elements */
-  width: 97.5%; /* Ensure card width matches the width of column 2 */
-  height: var(--row2-card-height); /* Fixed height */
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  border: 1px solid #ccc; /* Border around the entire card */
-  overflow: hidden;
-}
-
-/* Card Title */
-.card-row1-col1 .title {
-  color: #555;
-  font-size: 20px;
-  margin: 0;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-/* Numbered Biomarkers List */
-.card-row1-col1 .biomarkers-list {
-  color: #555;
-  list-style-type: decimal; /* Changes to numbered list */
-  padding-left: 20px;
-  margin: 0;
-  font-size: 16px;
-}
-
-/* Warning Title */
-.card-row1-col1 .card-warning {
-  font-size: 20px;
-  margin: 0;
-  font-weight: bold;
-  color: var(--orange);
-  margin-top: var(--warning-title-y-placement);
-}
-
-/* Warning Text */
-.card-row1-col1 .card-warning-text {
-  color: #555;
-  font-size: 12px;
-  margin: 0;
-  color: #555;
-  line-height: 1.5;
-  margin-top: var(--warning-text-y-placement);
-}
-
-/* Card Title */
-.card-row2-col1 .title {
-  color: #555;
-  font-size: 20px;
-  margin: 0;
-  font-weight: bold;
-  padding-left: 15px;
-  padding-top: 15px;
-}
-
-.card-row2-col1 .text {
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
-  padding-left: 15px;
-  padding-top: 15px;
-  margin-top: var(--concept-based-explanation-text-y-placement);
-}
-
-/* Basic styles for the radio button */
-input[type="radio"] {
-  -moz-appearance: none; /* Firefox */
-  -webkit-appearance: none; /* Chrome/Safari */
-  appearance: none; /* Standardize across browsers */
-  margin: 0;
-  padding: 0;
+.nav-button {
+  background: linear-gradient(90deg, var(--primary-pink), var(--primary-pink-dark));
+  color: var(--white);
   border: none;
-  outline: none;
-  border-radius: 50%; /* Ensure the button is round */
-  width: 15px;
-  height: 15px;
-  box-sizing: border-box;
-  background-color: #fff; /* White background when not selected */
+  padding: var(--padding-sm) var(--padding-lg);
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  position: relative;
-  display: inline-block;
-  border: 2px solid #888; /* Default border color */
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px var(--shadow-color);
 }
 
-/* when radio button is selected */
-input[type="radio"]:checked {
-  background-color: #fff; /* Keep background white */
-  border-color: #2196f3; /* Blue border when selected */
-}
-
-/* Inner blue circle when radio button is selected */
-input[type="radio"]:checked::after {
-  content: "";
-  position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  width: 8px; /* Size of the inner blue circle */
-  height: 8px; /* Size of the inner blue circle */
-  background-color: #2196f3; /* Blue inner circle */
-  border-radius: 50%;
-  transform: translate(-50%, -50%); /* Center the inner circle perfectly */
+.nav-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px var(--shadow-color);
 }

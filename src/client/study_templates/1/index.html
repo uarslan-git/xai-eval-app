@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blockies Evaluation - Variation 1</title>
+    <title>Blockies Evaluation - Blossom Edition</title>
     <link rel="icon" href="data:image/x-icon;," />
     <link rel="stylesheet" href="index_variation1.css" />
     <link
@@ -11,19 +11,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <script src="index.js" defer></script>
-    <style>
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-      .image-container, .img-container {
-        display: inline-block;
-        max-width: 100%;
-        height: auto;
-        overflow: hidden;
-      }
-    </style>
   </head>
   <body>
     <div class="app-container">
@@ -48,25 +35,15 @@
           <div class="left-panel">
             <section class="card biomarker-card">
               <h3 class="card-title">OCDegen Biomarkers</h3>
-              <ul class="biomarkers-list">
-                <li>Strong Spine Bend</li>
-                <li>Strong Bone Variation</li>
-                <li>Tucked Head</li>
-                <li>Main Bones Mutation</li>
-              </ul>
+              <ul class="biomarkers-list"></ul>
               <div class="warning-section">
                 <h3 class="warning-title">
                   <i class="fas fa-exclamation-triangle"></i> Warning:
                 </h3>
                 <p class="warning-text">
                   OCDegen can be fatal if not diagnosed and treated early.
-                  Treatment, however, is costly and highly invasive. Please
-                  verify all diagnoses before making your final decision.
-                  Furthermore, incorrect responses negatively affect your
-                  performance bonus.
+                  Verify all diagnoses before making your final decision.
                 </p>
-                <!-- Heatmap Gallery Container -->
-                <div id="heatmap-gallery" style="margin-top: 24px;"></div>
               </div>
             </section>
             <section class="card explanation-card">
@@ -74,85 +51,33 @@
               <p class="explanation-text">
                 Concept-based explanations help explain a diagnosis by
                 identifying key features in the Blocky X-ray that influenced the
-                decision. These explanations highlight specific areas in the
-                X-ray that correspond to specific concepts being shown, making
-                it easier to understand what aspects of the image contributed to
-                the diagnosis.
+                decision.
               </p>
-            </section>
-
-            <section class="card visualization-card">
-              <h3 class="card-title">AI Visualizations</h3>
-              <div class="visualization-content">
-                <div class="visualization-item">
-                  <h4>Heatmap</h4>
-                  <div class="visualization-image-container">
-                    <img
-                      id="heatmap-image"
-                      src=""
-                      alt="Heatmap visualization"
-                      class="visualization-image"
-                      style="display: none"
-                    />
-                    <div class="visualization-placeholder">
-                      No visualization available
-                    </div>
-                  </div>
-                </div>
-                <div class="visualization-item">
-                  <h4>Waterfall Plot</h4>
-                  <div class="visualization-image-container">
-                    <img
-                      id="waterfall-image"
-                      src=""
-                      alt="Waterfall plot visualization"
-                      class="visualization-image"
-                      style="display: none"
-                    />
-                    <div class="visualization-placeholder">
-                      No visualization available
-                    </div>
-                  </div>
-                </div>
-              </div>
             </section>
           </div>
 
           <div class="right-panel">
             <section class="card x-ray-card">
-              <div class="x-ray-header">
-                <div class="patient-id-display" id="patient-id-location2"></div>
-              </div>
-              <div class="x-ray-image-heatmap-wrapper">
-                <div class="x-ray-image-container">
-                  <div class="xray-container">
-                    <img
-                      id="patient-x-ray-image"
-                      src=""
-                      alt="Patient X-Ray Image"
-                      class="x-ray-image"
-                    />
-                  </div>
+              <div class="x-ray-grid">
+                <div class="grid-item grid-item-main">
+                  <img id="patient-x-ray-image" src="" alt="Patient X-Ray Image" />
                 </div>
-                <div class="heatmap-container">
-                  <!-- Heatmap overlay will be rendered here by JS if available -->
+                <div class="grid-item">
+                  <img src="../../img/heatmaps/heatmap1.png" alt="Heatmap 1" />
                 </div>
-              </div>
-              <div class="x-ray-caption">
-                <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-                <p>
-                  <b>Suggested Diagnosis:</b>
-                  <span id="suggested-diag-location2" class="unhealthy"></span>
-                </p>
-                <p>
-                  <b>True Diagnosis:</b>
-                  <span id="true-diag" class="healthy"></span>
-                </p>
+                <div class="grid-item">
+                   <img src="../../img/heatmaps/heatmap1.png" alt="Heatmap 2" />
+                </div>
+                <div class="grid-item">
+                   <img src="../../img/heatmaps/heatmap1.png" alt="Heatmap 3" />
+                </div>
+                <div class="grid-item grid-item-waterfall">
+                  <img src="../../img/sample_page.png" alt="Waterfall Plot" />
+                </div>
               </div>
             </section>
 
             <section class="card user-diagnosis-card">
-              <div class="user-diagnosis">
                 <div class="diagnosis-title">Your Diagnosis</div>
                 <div class="diagnosis-options">
                   <label class="radio-label healthy-label">
@@ -174,17 +99,15 @@
                     OCDegen
                   </label>
                 </div>
-              </div>
             </section>
           </div>
         </div>
-        <div id="heatmap-gallery" style="margin:40px 0;"></div>
       </main>
 
       <footer class="app-footer">
         <div class="progress-container">
-          <div class="progress-bar" style="width: 50%"></div>
-          <div class="progress-text" id="progress-bar-text">Diagnosis 5/10</div>
+          <div class="progress-bar" style="width: 0%"></div>
+          <div class="progress-text" id="progress-bar-text">Diagnosis 0/0</div>
         </div>
         <div class="navigation-buttons">
           <button id="button-prev" class="nav-button">Previous</button>
@@ -192,36 +115,5 @@
         </div>
       </footer>
     </div>
-    <div id="heatmap-gallery" style="margin:40px 0;"></div>
   </body>
 </html>
-<script>
-// Dynamically fetch and render heatmaps next to the patient-x-ray-image
-window.addEventListener('DOMContentLoaded', async function () {
-  const xrayImg = document.getElementById('patient-x-ray-image');
-  if (!xrayImg) return;
-  const container = xrayImg.parentElement;
-  try {
-    const res = await fetch('/api/heatmaps');
-    const data = await res.json();
-    if (Array.isArray(data.images)) {
-      data.images.forEach(async filename => {
-        const resp = await fetch(`/api/heatmap/${filename}`);
-        const imgData = await resp.json();
-        if (imgData.heatmap) {
-          const img = document.createElement('img');
-          img.src = imgData.heatmap;
-          img.alt = filename;
-          img.style.maxWidth = '200px';
-          img.style.marginLeft = '16px';
-          img.style.borderRadius = '8px';
-          img.style.boxShadow = '0 2px 8px #0006';
-          container.appendChild(img);
-        }
-      });
-    }
-  } catch (e) {
-    // Optionally handle error
-  }
-});
-</script>

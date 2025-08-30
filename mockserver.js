@@ -67,20 +67,20 @@ const diagnoses = [
   },
 ];
 
-app.post("/api/evidences", (req, res) => {
-  const { diagnosis, imageId } = req.body;
+app.get("/api/evidence/:diagnosis", (req, res) => {
+  const { diagnosis } = req.params;
   const found = diagnoses.find((d) => d.name === diagnosis);
 
   // Generate more realistic mock base64 images for heatmap and waterfall
-  const generateMockImage = (type, diagnosis, imageId) => {
+  const generateMockImage = () => {
     // This is a simple 1x1 pixel PNG in base64 - in real implementation, these would be actual visualizations
     const baseImage =
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
     return `data:image/png;base64,${baseImage}`;
   };
 
-  const heatmap = generateMockImage("heatmap", diagnosis, imageId);
-  const waterfall = generateMockImage("waterfall", diagnosis, imageId);
+  const heatmap = generateMockImage();
+  const waterfall = generateMockImage();
 
   if (found) {
     res.json({
