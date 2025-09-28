@@ -285,11 +285,94 @@ function cb_event_get_study_details(req, res) {
 }
 */
 
+// Mock evidence data for different diagnoses
+const mockEvidenceData = {
+    healthy: {
+        evidenceFor: [
+            { concept: "Clear Lung Fields", importance: 0.92, description: "No signs of opacity or consolidation" },
+            { concept: "Normal Heart Size", importance: 0.87, description: "Heart within normal limits" },
+            { concept: "Sharp Costophrenic Angles", importance: 0.84, description: "No pleural effusion detected" },
+            { concept: "Normal Bone Structure", importance: 0.79, description: "No fractures or abnormalities" }
+        ],
+        evidenceAgainst: [
+            { concept: "Minor Artifacts", importance: 0.23, description: "Some imaging artifacts present" },
+            { concept: "Age-related Changes", importance: 0.15, description: "Minimal age-related bone changes" }
+        ]
+    },
+    unhealthy: {
+        evidenceFor: [
+            { concept: "Strong Spine Bend", importance: 0.95, description: "Significant spinal curvature detected" },
+            { concept: "Bone Variation", importance: 0.89, description: "Abnormal bone density patterns" },
+            { concept: "Tucked Head Position", importance: 0.83, description: "Unusual head positioning" },
+            { concept: "Main Bones Mutation", importance: 0.78, description: "Structural bone abnormalities" }
+        ],
+        evidenceAgainst: [
+            { concept: "Partial Normal Areas", importance: 0.34, description: "Some regions appear normal" },
+            { concept: "Unclear Boundaries", importance: 0.27, description: "Some diagnostic uncertainty" },
+            { concept: "Image Quality", importance: 0.19, description: "Possible image quality issues" }
+        ]
+    }
+};
+
+// API endpoint to get evidence for a specific diagnosis
+function cb_event_get_evidence(req, res) {
+    const { diagnosis, patientId } = req.query;
+    
+    console.log(`Fetching evidence for diagnosis: ${diagnosis}, patient: ${patientId}`);
+    
+    if (!diagnosis || !mockEvidenceData[diagnosis.toLowerCase()]) {
+        return res.status(400).json({ error: "Invalid diagnosis. Use 'healthy' or 'unhealthy'" });
+    }
+    
+    const evidence = mockEvidenceData[diagnosis.toLowerCase()];
+    
+    // Add some randomization to make it feel more dynamic
+    const randomizedEvidence = {
+        evidenceFor: evidence.evidenceFor.map(item => ({
+            ...item,
+            importance: Math.max(0.1, item.importance + (Math.random() - 0.5) * 0.1)
+        })),
+        evidenceAgainst: evidence.evidenceAgainst.map(item => ({
+            ...item,
+            importance: Math.max(0.1, item.importance + (Math.random() - 0.5) * 0.1)
+        }))
+    };
+    
+    res.json({
+        diagnosis,
+        patientId,
+        ...randomizedEvidence
+    });
+}
+
+// API endpoint to get available SHAP visualizations for a patient
+function cb_event_get_shap_visualizations(req, res) {
+    const { patientId } = req.query;
+    
+    console.log(`Fetching SHAP visualizations for patient: ${patientId}`);
+    
+    // Mock SHAP visualization data
+    const shapData = {
+        patientId,
+        waterfallPlot: `/visualizations/patient_${patientId}/waterfall.png`,
+        heatmaps: [
+            `/visualizations/patient_${patientId}/heatmap_1.png`,
+            `/visualizations/patient_${patientId}/heatmap_2.png`,
+            `/visualizations/patient_${patientId}/heatmap_3.png`,
+            `/visualizations/patient_${patientId}/heatmap_4.png`
+        ]
+    };
+    
+    res.json(shapData);
+}
+
 init();
 register_post_event("/db_validation_participant_id_and_study_id", cb_event_db_validation_participant_id_and_study_id);
 register_post_event("/write_db", cb_event_write_db);
 register_get_event("/read_db", cb_event_read_db);
 register_get_event("/read_db_prev", cb_event_read_db_prev);
+register_get_event("/api/evidence", cb_event_get_evidence);
+register_get_event("/api/shap-visualizations", cb_event_get_shap_visualizations);
 //register_get_event("/read_db_get_last_updated_page_nr", cb_event_get_last_updated_page_nr);
 //register_get_event("/read_db_get_study_details", cb_event_get_study_details);
 

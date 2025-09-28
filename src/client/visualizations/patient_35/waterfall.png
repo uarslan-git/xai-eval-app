@@ -1,0 +1,3 @@
+# This is a placeholder for SHAP waterfall plot for patient 35
+# In a real implementation, this would be a generated PNG file showing
+# the waterfall plot visualization from SHAP explaining the model's decision

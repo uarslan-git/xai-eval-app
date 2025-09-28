@@ -156,20 +156,16 @@ header > h1{
 main {
     position: relative;
     display: grid;
-    /* 60% 38%; */  /* Adjust the height of row1 and row2*/
-    grid-template-rows: calc(var(--body-height) * 0.6)   /* 10% of --app-height */
-                       calc(var(--body-height) * 0.3);  /* 10% of --app-height */
-    column-gap: 15px; /* 10px gap between columns */
-    row-gap: 15px;    /* 5px gap between rows */
+    /* Three rows layout: 45% 25% 25% */
+    grid-template-rows: calc(var(--body-height) * 0.45)   /* Main content row */
+                       calc(var(--body-height) * 0.25)   /* Diagnosis row */
+                       calc(var(--body-height) * 0.25);  /* Interactive features row */
+    column-gap: 15px;
+    row-gap: 15px;
     padding: 1rem;
     background: transparent;
-    overflow-y: hidden;
+    overflow-y: auto;
     animation: fadeInUp 0.8s ease-out 0.3s both;
-    /*viki_comment: The following Disable : For the main columns to be full length*/
-    /*
-    align-items: center;
-    justify-content: center;
-    */
 }
 
 @keyframes fadeInUp {
@@ -410,6 +406,296 @@ footer .progress-bar {
 @keyframes progressGlow {
     from { box-shadow: 0 0 10px rgba(79, 172, 254, 0.3); }
     to { box-shadow: 0 0 20px rgba(79, 172, 254, 0.6); }
+}
+
+/* Main Row 3 - Interactive Features */
+.main-row3 {
+    display: grid;
+    background: none;
+    border-radius: 8px;
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    height: calc(var(--body-height) * 0.25);
+    border: var(--border2);
+    overflow: hidden;
+    column-gap: 15px;
+    padding: 0;
+    animation: slideInFromBottom 0.8s ease-out 0.6s both;
+}
+
+/* Evidence Panel */
+.card-row3-col1 {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    padding: 20px;
+    border: none;
+    overflow-y: auto;
+    transition: var(--transition-smooth);
+}
+
+.card-row3-col1:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.diagnosis-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.diagnosis-selector label {
+    font-weight: 600;
+    color: #555;
+}
+
+.diagnosis-selector select {
+    padding: 8px 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    transition: var(--transition-smooth);
+}
+
+.diagnosis-selector select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#fetch-evidence-btn {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-bounce);
+    box-shadow: var(--button-shadow);
+}
+
+#fetch-evidence-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.evidence-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.evidence-section {
+    margin-bottom: 20px;
+}
+
+.evidence-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.evidence-for {
+    background: var(--success-gradient);
+    color: white;
+}
+
+.evidence-against {
+    background: var(--warning-gradient);
+    color: white;
+}
+
+.evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.evidence-item {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: var(--transition-smooth);
+}
+
+.evidence-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.evidence-concept {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.evidence-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.evidence-importance {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+}
+
+/* SHAP Visualizations Panel */
+.card-row3-col2 {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    padding: 20px;
+    border: none;
+    overflow-y: auto;
+    transition: var(--transition-smooth);
+}
+
+.card-row3-col2:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.visualizations-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.waterfall-section, .heatmaps-section {
+    flex: 1;
+}
+
+.viz-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.viz-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+}
+
+.viz-btn {
+    background: var(--success-gradient);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-bounce);
+    box-shadow: var(--button-shadow);
+}
+
+.viz-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.heatmaps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.heatmap-btn {
+    background: var(--secondary-gradient);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition-bounce);
+    box-shadow: 0 3px 10px rgba(245, 87, 108, 0.3);
+}
+
+.heatmap-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    position: relative;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    margin: 5% auto;
+    padding: 30px;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow-hover);
+    animation: scaleIn 0.3s ease-out;
+}
+
+.modal-close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.modal-close:hover {
+    color: var(--orange);
+    transform: scale(1.2);
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-body {
+    text-align: center;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 15px;
+    border: 2px dashed var(--blue);
+    color: #666;
+    font-style: italic;
 }
 
 footer .progress-text {
