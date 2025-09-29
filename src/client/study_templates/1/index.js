@@ -98,6 +98,11 @@ function set_patient_id(id)
 {
     patient_id1.textContent = id.toString();
     patient_id2.textContent = "Patient ID: " + id.toString();
+    
+    // Notify interactive features of the current patient
+    if (window.interactiveFeatures) {
+        window.interactiveFeatures.setCurrentPatientId(id.toString());
+    }
 }
 
 function set_x_ray_image(src)
@@ -421,7 +426,13 @@ async function load_json_data() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM Content Loaded - initializing components');
     await load_json_data();
+    
+    // Initialize interactive features after DOM is ready
+    console.log('About to create InteractiveFeatures instance');
+    window.interactiveFeatures = new InteractiveFeatures();
+    console.log('InteractiveFeatures instance created:', window.interactiveFeatures);
 });
 
 button_next.addEventListener("click", function() {
@@ -431,6 +442,383 @@ button_next.addEventListener("click", function() {
 button_prev.addEventListener("click", function() {
     prev_button_action();
 });
+
+// Interactive Features - Evidence and SHAP Visualizations
+class InteractiveFeatures {
+    constructor() {
+        this.initializeEventListeners();
+        this.currentPatientId = null;
+    }
+
+    initializeEventListeners() {
+        console.log('InteractiveFeatures: Initializing event listeners');
+        
+        // Evidence fetching
+        const fetchEvidenceBtn = document.getElementById('fetch-evidence-btn');
+        const diagnosisSelect = document.getElementById('evidence-diagnosis');
+        
+        console.log('InteractiveFeatures: Found elements', {
+            fetchEvidenceBtn: !!fetchEvidenceBtn,
+            diagnosisSelect: !!diagnosisSelect
+        });
+        
+        if (fetchEvidenceBtn) {
+            console.log('InteractiveFeatures: Adding click listener to fetch button');
+            fetchEvidenceBtn.addEventListener('click', () => {
+                console.log('InteractiveFeatures: Fetch evidence button clicked!');
+                this.fetchEvidence();
+            });
+        } else {
+            console.error('InteractiveFeatures: fetch-evidence-btn not found!');
+        }
+
+        if (diagnosisSelect) {
+            diagnosisSelect.addEventListener('change', () => {
+                const evidenceContainer = document.getElementById('evidence-container');
+                if (evidenceContainer) {
+                    evidenceContainer.style.display = 'none';
+                }
+            });
+        }
+
+        // SHAP visualization buttons
+        const waterfallBtn = document.getElementById('view-waterfall-btn');
+        if (waterfallBtn) {
+            waterfallBtn.addEventListener('click', () => this.viewWaterfallPlot());
+        }
+
+        const heatmapBtns = document.querySelectorAll('.heatmap-btn');
+        heatmapBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const heatmapNum = e.target.dataset.heatmap;
+                this.viewHeatmap(heatmapNum);
+            });
+        });
+
+        // Modal close functionality
+        const modalClose = document.querySelector('.modal-close');
+        const modal = document.getElementById('visualization-modal');
+        
+        if (modalClose && modal) {
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    setCurrentPatientId(patientId) {
+        this.currentPatientId = patientId;
+        // Load visualizations when patient ID is set
+        this.loadPatientVisualizations(patientId);
+    }
+
+    async loadPatientVisualizations(patientId) {
+        console.log('Loading visualizations for patient:', patientId);
+        
+        try {
+            const response = await fetch(`/api/visualizations/${patientId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch visualizations: ${response.status}`);
+            }
+            
+            const visualizations = await response.json();
+            console.log('Received visualizations:', visualizations);
+            
+            this.updateVisualizationButtons(visualizations);
+        } catch (error) {
+            console.error('Error loading patient visualizations:', error);
+            // Show default visualizations on error
+            this.updateVisualizationButtons({
+                heatmaps: [
+                    { id: 1, name: 'Default Heatmap 1', isMock: true },
+                    { id: 2, name: 'Default Heatmap 2', isMock: true }
+                ],
+                waterfall: { name: 'Default Waterfall Plot', isMock: true }
+            });
+        }
+    }
+
+    updateVisualizationButtons(visualizations) {
+        // Update waterfall button
+        const waterfallBtn = document.getElementById('view-waterfall-btn');
+        if (waterfallBtn && visualizations.waterfall) {
+            waterfallBtn.textContent = visualizations.waterfall.name || 'View Waterfall Plot';
+            waterfallBtn.style.display = 'block';
+            if (visualizations.waterfall.isMock) {
+                waterfallBtn.textContent += ' (Mock)';
+                waterfallBtn.style.opacity = '0.7';
+            }
+        }
+
+        // Update heatmap buttons
+        const heatmapsContainer = document.getElementById('heatmaps-container');
+        if (heatmapsContainer) {
+            // Clear existing buttons
+            heatmapsContainer.innerHTML = '';
+            
+            // Add buttons for each available heatmap
+            visualizations.heatmaps.forEach(heatmap => {
+                const button = document.createElement('button');
+                button.className = 'heatmap-btn';
+                button.dataset.heatmap = heatmap.id;
+                button.dataset.url = heatmap.url;
+                button.textContent = heatmap.name;
+                
+                if (heatmap.isMock) {
+                    button.textContent += ' (Mock)';
+                    button.style.opacity = '0.7';
+                }
+                
+                button.addEventListener('click', (e) => {
+                    const heatmapId = e.target.dataset.heatmap;
+                    const heatmapUrl = e.target.dataset.url;
+                    this.viewHeatmap(heatmapId, heatmap.name, heatmapUrl);
+                });
+                
+                heatmapsContainer.appendChild(button);
+            });
+            
+            if (visualizations.heatmaps.length === 0) {
+                heatmapsContainer.innerHTML = '<p style="color: #666; font-style: italic;">No heatmaps available for this patient</p>';
+            }
+        }
+
+        // Store visualizations for later use
+        this.patientVisualizations = visualizations;
+    }
+
+    async fetchEvidence() {
+        console.log('InteractiveFeatures: fetchEvidence called');
+        
+        const diagnosisSelect = document.getElementById('evidence-diagnosis');
+        const evidenceContainer = document.getElementById('evidence-container');
+        const fetchBtn = document.getElementById('fetch-evidence-btn');
+
+        console.log('InteractiveFeatures: Elements check', {
+            diagnosisSelect: !!diagnosisSelect,
+            evidenceContainer: !!evidenceContainer,
+            fetchBtn: !!fetchBtn
+        });
+
+        if (!diagnosisSelect || !evidenceContainer || !fetchBtn) {
+            console.error('InteractiveFeatures: Missing required elements');
+            return;
+        }
+
+        const diagnosis = diagnosisSelect.value;
+        console.log('InteractiveFeatures: Selected diagnosis:', diagnosis);
+        
+        if (!diagnosis) {
+            console.log('InteractiveFeatures: No diagnosis selected');
+            alert('Please select a diagnosis first');
+            return;
+        }
+
+        // Show loading state
+        fetchBtn.textContent = 'Loading...';
+        fetchBtn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/evidence?diagnosis=${diagnosis}&patientId=${this.currentPatientId || 'unknown'}`);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch evidence');
+            }
+
+            const data = await response.json();
+            console.log('InteractiveFeatures: Received data from server:', data);
+            
+            this.displayEvidence(data);
+            
+            console.log('InteractiveFeatures: Setting evidenceContainer display to block');
+            evidenceContainer.style.display = 'block';
+            
+            // Add a temporary visual indicator
+            evidenceContainer.style.border = '2px solid red';
+            evidenceContainer.style.background = 'rgba(255, 255, 0, 0.1)';
+            
+            console.log('InteractiveFeatures: evidenceContainer display set. Current style:', evidenceContainer.style.cssText);
+
+        } catch (error) {
+            console.error('Error fetching evidence:', error);
+            alert('Error fetching evidence. Please try again.');
+        } finally {
+            fetchBtn.textContent = 'Get Evidence';
+            fetchBtn.disabled = false;
+        }
+    }
+
+    displayEvidence(data) {
+        console.log('InteractiveFeatures: displayEvidence called with data:', data);
+        
+        const evidenceForList = document.getElementById('evidence-for-list');
+        const evidenceAgainstList = document.getElementById('evidence-against-list');
+
+        console.log('InteractiveFeatures: Evidence list elements', {
+            evidenceForList: !!evidenceForList,
+            evidenceAgainstList: !!evidenceAgainstList
+        });
+
+        if (!evidenceForList || !evidenceAgainstList) {
+            console.error('InteractiveFeatures: Evidence list elements not found');
+            return;
+        }
+
+        // Clear existing content
+        evidenceForList.innerHTML = '';
+        evidenceAgainstList.innerHTML = '';
+
+        console.log('InteractiveFeatures: Processing evidence items');
+        console.log('Evidence For items:', data.evidenceFor?.length);
+        console.log('Evidence Against items:', data.evidenceAgainst?.length);
+
+        // Display evidence for
+        data.evidenceFor.forEach((item, index) => {
+            console.log(`Creating evidence FOR item ${index}:`, item);
+            const evidenceItem = this.createEvidenceItem(item);
+            evidenceForList.appendChild(evidenceItem);
+        });
+
+        // Display evidence against
+        data.evidenceAgainst.forEach((item, index) => {
+            console.log(`Creating evidence AGAINST item ${index}:`, item);
+            const evidenceItem = this.createEvidenceItem(item);
+            evidenceAgainstList.appendChild(evidenceItem);
+        });
+
+        console.log('InteractiveFeatures: Evidence display completed');
+    }
+
+    createEvidenceItem(item) {
+        const div = document.createElement('div');
+        div.className = 'evidence-item';
+        
+        const importancePercentage = Math.round(item.importance * 100);
+        
+        div.innerHTML = `
+            <div class="evidence-concept">${item.concept}</div>
+            <div class="evidence-description">${item.description}</div>
+            <div class="evidence-importance">Importance: ${importancePercentage}%</div>
+        `;
+
+        // Add animation
+        div.style.opacity = '0';
+        div.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            div.style.transition = 'all 0.3s ease-out';
+            div.style.opacity = '1';
+            div.style.transform = 'translateY(0)';
+        }, 100);
+
+        return div;
+    }
+
+    async viewWaterfallPlot() {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !modalTitle || !modalBody) return;
+
+        const waterfall = this.patientVisualizations?.waterfall;
+        
+        modalTitle.textContent = waterfall?.name || 'SHAP Waterfall Plot';
+        
+        if (waterfall && waterfall.url && !waterfall.isMock) {
+            // Show actual image
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <img src="${waterfall.url}" alt="SHAP Waterfall Plot" 
+                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                         onload="console.log('Waterfall image loaded successfully')"
+                         onerror="console.error('Failed to load waterfall image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; padding: 20px; color: #666;">
+                        <p>Failed to load waterfall visualization</p>
+                        <p><em>Image path: ${waterfall.url}</em></p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show placeholder
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
+                        <p style="color: #666; font-size: 18px; margin: 0;">📊</p>
+                        <p style="color: #666; margin: 10px 0;">SHAP Waterfall Visualization</p>
+                        <p style="color: #888; font-size: 14px; margin: 0;">
+                            ${waterfall?.isMock ? 'Mock visualization - actual data not available' : 'No waterfall data available for this patient'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        modal.style.display = 'block';
+    }
+
+    async viewHeatmap(heatmapNum, heatmapName = null, heatmapUrl = null) {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !modalTitle || !modalBody) return;
+
+        // Find the specific heatmap data
+        let heatmapData = null;
+        if (this.patientVisualizations?.heatmaps) {
+            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
+        }
+
+        const title = heatmapName || heatmapData?.name || `SHAP Heatmap ${heatmapNum}`;
+        const imageUrl = heatmapUrl || heatmapData?.url;
+        
+        modalTitle.textContent = title;
+        
+        if (imageUrl && !heatmapData?.isMock) {
+            // Show actual image
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <img src="${imageUrl}" alt="${title}" 
+                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                         onload="console.log('Heatmap image loaded successfully')"
+                         onerror="console.error('Failed to load heatmap image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; padding: 20px; color: #666;">
+                        <p>Failed to load heatmap visualization</p>
+                        <p><em>Image path: ${imageUrl}</em></p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show placeholder
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
+                        <p style="color: #666; font-size: 18px; margin: 0;">🔥</p>
+                        <p style="color: #666; margin: 10px 0;">SHAP Heatmap Visualization</p>
+                        <p style="color: #888; font-size: 14px; margin: 0;">
+                            ${heatmapData?.isMock ? 'Mock visualization - actual data not available' : 'No heatmap data available for this patient'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        modal.style.display = 'block';
+    }
+}
+
+// Interactive features are now initialized in DOMContentLoaded event
 
 
 
