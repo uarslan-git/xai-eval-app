@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Patient Visualizations API</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 5px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #5a6fd8; }
+        .result { margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 5px; }
+        .heatmap-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0; }
+        .heatmap-btn { background: #4facfe; }
+        .waterfall-btn { background: #f093fb; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Patient Visualizations API Test</h1>
+        
+        <h3>Test Different Patients:</h3>
+        <button onclick="testPatient('35')">Test Patient 35 (Has Data)</button>
+        <button onclick="testPatient('9')">Test Patient 9 (Has Data)</button>
+        <button onclick="testPatient('3')">Test Patient 3 (No Data)</button>
+        <button onclick="testPatient('unknown')">Test Unknown Patient</button>
+        
+        <div id="results"></div>
+    </div>
+    
+    <script>
+        async function testPatient(patientId) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                const response = await fetch(`/api/visualizations/${patientId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                let heatmapButtons = '';
+                data.heatmaps.forEach(heatmap => {
+                    const mockLabel = heatmap.isMock ? ' (Mock)' : '';
+                    heatmapButtons += `
+                        <button class="heatmap-btn" onclick="viewImage('${heatmap.url}', '${heatmap.name}')">
+                            ${heatmap.name}${mockLabel}
+                        </button>
+                    `;
+                });
+                
+                const waterfallButton = data.waterfall ? `
+                    <button class="waterfall-btn" onclick="viewImage('${data.waterfall.url}', '${data.waterfall.name}')">
+                        ${data.waterfall.name}${data.waterfall.isMock ? ' (Mock)' : ''}
+                    </button>
+                ` : '<p>No waterfall plot available</p>';
+                
+                resultsDiv.innerHTML = `
+                    <div class="result">
+                        <h3>Patient ${patientId} Visualizations</h3>
+                        
+                        <h4>Waterfall Plot:</h4>
+                        ${waterfallButton}
+                        
+                        <h4>Heatmaps (${data.heatmaps.length}):</h4>
+                        <div class="heatmap-buttons">
+                            ${heatmapButtons || '<p>No heatmaps available</p>'}
+                        </div>
+                        
+                        <h4>Raw API Response:</h4>
+                        <pre style="background: #fff; padding: 10px; border-radius: 3px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result">
+                        <h3 style="color: red;">Error for Patient ${patientId}</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function viewImage(url, name) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); display: flex; justify-content: center; 
+                align-items: center; z-index: 1000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 10px; max-width: 90%; max-height: 90%; overflow: auto;">
+                    <h3>${name}</h3>
+                    <img src="${url}" alt="${name}" style="max-width: 100%; height: auto; border-radius: 5px;"
+                         onload="console.log('Image loaded:', this.src)"
+                         onerror="console.error('Failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; padding: 20px; text-align: center; color: #666;">
+                        <p>❌ Failed to load image</p>
+                        <p><small>${url}</small></p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="margin-top: 10px; padding: 5px 10px; background: #ccc; border: none; border-radius: 3px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

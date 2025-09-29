@@ -515,6 +515,83 @@ class InteractiveFeatures {
 
     setCurrentPatientId(patientId) {
         this.currentPatientId = patientId;
+        // Load visualizations when patient ID is set
+        this.loadPatientVisualizations(patientId);
+    }
+
+    async loadPatientVisualizations(patientId) {
+        console.log('Loading visualizations for patient:', patientId);
+        
+        try {
+            const response = await fetch(`/api/visualizations/${patientId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch visualizations: ${response.status}`);
+            }
+            
+            const visualizations = await response.json();
+            console.log('Received visualizations:', visualizations);
+            
+            this.updateVisualizationButtons(visualizations);
+        } catch (error) {
+            console.error('Error loading patient visualizations:', error);
+            // Show default visualizations on error
+            this.updateVisualizationButtons({
+                heatmaps: [
+                    { id: 1, name: 'Default Heatmap 1', isMock: true },
+                    { id: 2, name: 'Default Heatmap 2', isMock: true }
+                ],
+                waterfall: { name: 'Default Waterfall Plot', isMock: true }
+            });
+        }
+    }
+
+    updateVisualizationButtons(visualizations) {
+        // Update waterfall button
+        const waterfallBtn = document.getElementById('view-waterfall-btn');
+        if (waterfallBtn && visualizations.waterfall) {
+            waterfallBtn.textContent = visualizations.waterfall.name || 'View Waterfall Plot';
+            waterfallBtn.style.display = 'block';
+            if (visualizations.waterfall.isMock) {
+                waterfallBtn.textContent += ' (Mock)';
+                waterfallBtn.style.opacity = '0.7';
+            }
+        }
+
+        // Update heatmap buttons
+        const heatmapsContainer = document.getElementById('heatmaps-container');
+        if (heatmapsContainer) {
+            // Clear existing buttons
+            heatmapsContainer.innerHTML = '';
+            
+            // Add buttons for each available heatmap
+            visualizations.heatmaps.forEach(heatmap => {
+                const button = document.createElement('button');
+                button.className = 'heatmap-btn';
+                button.dataset.heatmap = heatmap.id;
+                button.dataset.url = heatmap.url;
+                button.textContent = heatmap.name;
+                
+                if (heatmap.isMock) {
+                    button.textContent += ' (Mock)';
+                    button.style.opacity = '0.7';
+                }
+                
+                button.addEventListener('click', (e) => {
+                    const heatmapId = e.target.dataset.heatmap;
+                    const heatmapUrl = e.target.dataset.url;
+                    this.viewHeatmap(heatmapId, heatmap.name, heatmapUrl);
+                });
+                
+                heatmapsContainer.appendChild(button);
+            });
+            
+            if (visualizations.heatmaps.length === 0) {
+                heatmapsContainer.innerHTML = '<p style="color: #666; font-style: italic;">No heatmaps available for this patient</p>';
+            }
+        }
+
+        // Store visualizations for later use
+        this.patientVisualizations = visualizations;
     }
 
     async fetchEvidence() {
@@ -650,44 +727,92 @@ class InteractiveFeatures {
 
         if (!modal || !modalTitle || !modalBody) return;
 
-        modalTitle.textContent = 'SHAP Waterfall Plot';
-        modalBody.innerHTML = `
-            <div>
-                <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                <p>This would show the SHAP waterfall plot explaining how each feature contributed to the model's prediction.</p>
-                <p style="margin-top: 20px; font-size: 14px;">
-                    <em>In a real implementation, this would display the actual SHAP waterfall visualization image.</em>
-                </p>
-            </div>
-        `;
+        const waterfall = this.patientVisualizations?.waterfall;
+        
+        modalTitle.textContent = waterfall?.name || 'SHAP Waterfall Plot';
+        
+        if (waterfall && waterfall.url && !waterfall.isMock) {
+            // Show actual image
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <img src="${waterfall.url}" alt="SHAP Waterfall Plot" 
+                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                         onload="console.log('Waterfall image loaded successfully')"
+                         onerror="console.error('Failed to load waterfall image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; padding: 20px; color: #666;">
+                        <p>Failed to load waterfall visualization</p>
+                        <p><em>Image path: ${waterfall.url}</em></p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show placeholder
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
+                        <p style="color: #666; font-size: 18px; margin: 0;">📊</p>
+                        <p style="color: #666; margin: 10px 0;">SHAP Waterfall Visualization</p>
+                        <p style="color: #888; font-size: 14px; margin: 0;">
+                            ${waterfall?.isMock ? 'Mock visualization - actual data not available' : 'No waterfall data available for this patient'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
 
         modal.style.display = 'block';
     }
 
-    async viewHeatmap(heatmapNum) {
+    async viewHeatmap(heatmapNum, heatmapName = null, heatmapUrl = null) {
         const modal = document.getElementById('visualization-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
 
         if (!modal || !modalTitle || !modalBody) return;
 
-        const heatmapTitles = {
-            '1': 'Feature Importance Heatmap',
-            '2': 'Regional Analysis Heatmap', 
-            '3': 'Bone Structure Analysis Heatmap',
-            '4': 'Overall Model Confidence Heatmap'
-        };
+        // Find the specific heatmap data
+        let heatmapData = null;
+        if (this.patientVisualizations?.heatmaps) {
+            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
+        }
 
-        modalTitle.textContent = heatmapTitles[heatmapNum] || `SHAP Heatmap ${heatmapNum}`;
-        modalBody.innerHTML = `
-            <div>
-                <p><strong>Heatmap ${heatmapNum} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                <p>This would show the SHAP heatmap visualization highlighting important regions in the X-ray image.</p>
-                <p style="margin-top: 20px; font-size: 14px;">
-                    <em>In a real implementation, this would display the actual SHAP heatmap visualization image.</em>
-                </p>
-            </div>
-        `;
+        const title = heatmapName || heatmapData?.name || `SHAP Heatmap ${heatmapNum}`;
+        const imageUrl = heatmapUrl || heatmapData?.url;
+        
+        modalTitle.textContent = title;
+        
+        if (imageUrl && !heatmapData?.isMock) {
+            // Show actual image
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <img src="${imageUrl}" alt="${title}" 
+                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                         onload="console.log('Heatmap image loaded successfully')"
+                         onerror="console.error('Failed to load heatmap image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; padding: 20px; color: #666;">
+                        <p>Failed to load heatmap visualization</p>
+                        <p><em>Image path: ${imageUrl}</em></p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show placeholder
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
+                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
+                        <p style="color: #666; font-size: 18px; margin: 0;">🔥</p>
+                        <p style="color: #666; margin: 10px 0;">SHAP Heatmap Visualization</p>
+                        <p style="color: #888; font-size: 14px; margin: 0;">
+                            ${heatmapData?.isMock ? 'Mock visualization - actual data not available' : 'No heatmap data available for this patient'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
 
         modal.style.display = 'block';
     }

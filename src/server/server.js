@@ -376,6 +376,53 @@ function cb_event_get_heatmap(req, res) {
     });
 }
 
+function cb_event_get_patient_visualizations(req, res) {
+    const { patientId } = req.params;
+    
+    console.log(`[VISUALIZATIONS API] Fetching visualizations for patient: ${patientId}`);
+    
+    // Mock data based on available patient folders
+    const availablePatients = {
+        'patient_35': {
+            heatmaps: [
+                { id: 1, name: 'Feature Importance Heatmap', url: '/visualizations/patient_35/heatmap_1.png' },
+                { id: 2, name: 'Regional Analysis Heatmap', url: '/visualizations/patient_35/heatmap_2.png' },
+                { id: 3, name: 'Bone Structure Heatmap', url: '/visualizations/patient_35/heatmap_3.png' },
+                { id: 4, name: 'Overall Confidence Heatmap', url: '/visualizations/patient_35/heatmap_4.png' }
+            ],
+            waterfall: { url: '/visualizations/patient_35/waterfall.png', name: 'SHAP Waterfall Plot' }
+        },
+        'patient_9': {
+            heatmaps: [
+                { id: 1, name: 'Feature Importance Heatmap', url: '/visualizations/patient_9/heatmap_1.png' },
+                { id: 2, name: 'Regional Analysis Heatmap', url: '/visualizations/patient_9/heatmap_2.png' },
+                { id: 3, name: 'Bone Structure Heatmap', url: '/visualizations/patient_9/heatmap_3.png' },
+                { id: 4, name: 'Overall Confidence Heatmap', url: '/visualizations/patient_9/heatmap_4.png' }
+            ],
+            waterfall: { url: '/visualizations/patient_9/waterfall.png', name: 'SHAP Waterfall Plot' }
+        },
+        'patient_3': {
+            heatmaps: [],
+            waterfall: null
+        }
+    };
+    
+    // Default response for unknown patients or patients without data
+    const defaultResponse = {
+        heatmaps: [
+            { id: 1, name: 'Sample Feature Heatmap', url: '/visualizations/sample_heatmap_1.png', isMock: true },
+            { id: 2, name: 'Sample Analysis Heatmap', url: '/visualizations/sample_heatmap_2.png', isMock: true }
+        ],
+        waterfall: { url: '/visualizations/sample_waterfall.png', name: 'Sample Waterfall Plot', isMock: true }
+    };
+    
+    const patientKey = `patient_${patientId}`;
+    const visualizations = availablePatients[patientKey] || defaultResponse;
+    
+    console.log(`[VISUALIZATIONS API] Sending visualizations for ${patientId}:`, visualizations);
+    res.json(visualizations);
+}
+
 init();
 register_post_event("/db_validation_participant_id_and_study_id", cb_event_db_validation_participant_id_and_study_id);
 register_post_event("/write_db", cb_event_write_db);
@@ -391,6 +438,7 @@ function cb_event_test_api(req, res) {
 register_get_event("/api/test", cb_event_test_api);
 register_get_event("/api/evidence", cb_event_get_evidence);
 register_get_event("/api/heatmap/:imageId", cb_event_get_heatmap);
+register_get_event("/api/visualizations/:patientId", cb_event_get_patient_visualizations);
 
 //register_get_event("/read_db_get_last_updated_page_nr", cb_event_get_last_updated_page_nr);
 //register_get_event("/read_db_get_study_details", cb_event_get_study_details);
