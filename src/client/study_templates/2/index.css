@@ -6,32 +6,17 @@
   --app-width: calc(var(--fixed-screen-width)   *  (1 - 0.0)); /*reduce app-width */
   --app-height: calc(var(--fixed-screen-height) *  (1 - 0.0)); /*reduce app-height */
 
-  /* Modern Color Palette */
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #4a6741 100%);
-  --light-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  
-  --blue: #667eea;
+  --blue: #1e90ff;
   --white: #ffffff;
-  --orange: #f5576c;
-  --green: #00f2fe;
-  --bg-green: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --bg-gray: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  
+  --orange: #FF5733;
+  --green: #4CAF50;
+  --bg-green: #4CAF50;
+  --bg-gray: #1d2327; 
+  --border1: 2px solid black;
+  --border2: 2px solid black;
+  /*Disable Border*/
   --border1: none;
   --border2: none;
-  
-  /* Modern Shadows */
-  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.2);
-  --button-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  
-  /* Animation Variables */
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
  
   /*Viki_Commment: Only the following has to be modified between 3CARDS, 4CARDS, 5CARDS and 6CARDS layout*/
   --grid-row1-ncolumns: 3; /* viki_comment: only change this value to increase or decrease columns in first row */
@@ -59,8 +44,7 @@
 
 html,body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: Arial, sans-serif;
     /*overflow: hidden;*/ /* Prevents scrolling */
     width: 100vw; /* 100% of viewport width */
     height: 100vh; /* 100% of viewport height */
@@ -68,12 +52,6 @@ html,body {
     justify-content: center;
     align-items: center;
     display: flex;
-    animation: fadeIn 0.8s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 .fixed-page-dimension {
@@ -88,17 +66,10 @@ html,body {
 
 header {
     position: relative;
-    background: var(--primary-gradient);
+    background: var(--bg-green);
     color: white;
     padding: 1rem;
     text-align: center;
-    box-shadow: var(--card-shadow);
-    animation: slideInFromTop 0.6s ease-out;
-}
-
-@keyframes slideInFromTop {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }
 
 header > h1{
@@ -112,24 +83,11 @@ header > h1{
     position: absolute;
     top: 12px;
     right: 60px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
+    background: #1d2327;
     color: white;
-    padding: 10px 15px;
-    border-radius: 15px;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition-smooth);
-    animation: slideInFromRight 0.6s ease-out 0.2s both;
-}
-
-.header-info:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-@keyframes slideInFromRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    padding: 5px 5px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .header-info table {
@@ -156,21 +114,19 @@ header > h1{
 main {
     position: relative;
     display: grid;
-    /* Three rows layout: 45% 25% 25% */
-    grid-template-rows: calc(var(--body-height) * 0.45)   /* Main content row */
-                       calc(var(--body-height) * 0.25)   /* Diagnosis row */
-                       calc(var(--body-height) * 0.25);  /* Interactive features row */
-    column-gap: 15px;
-    row-gap: 15px;
-    padding: 1rem;
-    background: transparent;
-    overflow-y: auto;
-    animation: fadeInUp 0.8s ease-out 0.3s both;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    /* 60% 38%; */  /* Adjust the height of row1 and row2*/
+    grid-template-rows: calc(var(--body-height) * 0.6)   /* 10% of --app-height */
+                       calc(var(--body-height) * 0.3);  /* 10% of --app-height */
+    column-gap: 1px; /* 10px gap between columns */
+    row-gap: 1px;    /* 5px gap between rows */
+    padding: 0.1rem;
+    background: #f4f4f9;
+    overflow-y: hidden;
+    /*viki_comment: The following Disable : For the main columns to be full length*/
+    /*
+    align-items: center;
+    justify-content: center;
+    */
 }
 
 .main-row1 {
@@ -208,24 +164,12 @@ main {
     gap: 1px;                    /* 5px gap between elements */
     
     height: var(--row1-card-height);              /* Fixed height */
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     grid-template-rows: 10% 60% 30%;  /* Row heights as specified */
-    border: none;   /* Border around the entire card */
+    border: 1px solid #ccc;   /* Border around the entire card */
     overflow: hidden;
-    transition: var(--transition-smooth);
-    animation: scaleIn 0.6s ease-out;
-}
-
-.card-row1-col2-3-4-5:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-@keyframes scaleIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
 }
 
 /* First Row - Patient ID */
@@ -306,29 +250,13 @@ main {
 }
 
 .main-row2 .user-diagnosis .rectangle .healthy-label {
-    background: var(--success-gradient);  /* Green background for Healthy */
+    background-color: var(--green);  /* Green background for Healthy */
     color: white;
-    border-radius: 25px;
-    transition: var(--transition-bounce);
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-}
-
-.main-row2 .user-diagnosis .rectangle .healthy-label:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
 }
 
 .main-row2 .user-diagnosis .rectangle .unhealthy-label {
-    background: var(--secondary-gradient);  /* Orange background for Unhealthy */
+    background-color: var(--orange);  /* Orange background for Unhealthy */
     color: white;
-    border-radius: 25px;
-    transition: var(--transition-bounce);
-    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
-}
-
-.main-row2 .user-diagnosis .rectangle .unhealthy-label:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
 }
 
 footer {
@@ -337,8 +265,6 @@ footer {
     color: white;
     text-align: center;
     padding: 1rem;
-    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
-    animation: slideInFromBottom 0.6s ease-out 0.5s both;
 }
 
 footer .nav-buttons {
@@ -351,26 +277,17 @@ footer .nav-buttons {
 }
 
 footer .nav-buttons button {
-    background: var(--success-gradient);
+    background: var(--green);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     cursor: pointer;
-    transition: var(--transition-bounce);
-    box-shadow: var(--button-shadow);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    transition: background 0.3s;
 }
 
 footer .nav-buttons button:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
-}
-
-footer .nav-buttons button:active {
-    transform: translateY(-1px) scale(1.02);
+    background: #45a049;
 }
 
 footer .progress-bar-container {
@@ -379,12 +296,11 @@ footer .progress-bar-container {
     left: 50%;
     transform: translateX(-50%); /* Centers the bar horizontally */
     width: 500px;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.1); /* Background color of the progress bar */
-    border-radius: 20px; /* Rounded corners for the container */
+    height: 30px;
+    background-color: #555; /* Background color of the progress bar */
+    border-radius: 5px; /* Rounded corners for the container */
     overflow: hidden;  /* Ensures text stays within the bar */
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+
 }
 
 footer .progress-bar {
@@ -392,58 +308,14 @@ footer .progress-bar {
     display: flex;
     width: 50%; /* Set the progress here */
     height: 100%;
-    background: var(--success-gradient); /* Progress color */
-    border-radius: 20px; /* Rounded corners for the progress bar */
+    background-color: var(--green); /* Progress color */
+    border-radius: 5px; /* Rounded corners for the progress bar */
     align-items: center;
     justify-content: center;   /* Center text horizontally */
     overflow: hidden;           /* Prevents overflow of text */
     white-space: nowrap;        /* Prevents text from wrapping */
-    text-align: center;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: progressGlow 2s ease-in-out infinite alternate;
+    text-align: center; 
 }
-
-@keyframes progressGlow {
-    from { box-shadow: 0 0 10px rgba(79, 172, 254, 0.3); }
-    to { box-shadow: 0 0 20px rgba(79, 172, 254, 0.6); }
-}
-
-/* Interactive Features - Same as Template 1 */
-.main-row3 { display: grid; background: none; border-radius: 8px; grid-template-columns: 1fr 1fr; height: calc(var(--body-height) * 0.25); border: var(--border2); overflow: hidden; column-gap: 15px; padding: 0; animation: slideInFromBottom 0.8s ease-out 0.6s both; }
-.card-row3-col1, .card-row3-col2 { display: flex; flex-direction: column; background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%); box-shadow: var(--card-shadow); border-radius: 20px; padding: 20px; border: none; overflow-y: auto; transition: var(--transition-smooth); }
-.card-row3-col1:hover, .card-row3-col2:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
-.diagnosis-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-.diagnosis-selector label { font-weight: 600; color: #555; }
-.diagnosis-selector select { padding: 8px 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 14px; background: white; transition: var(--transition-smooth); }
-.diagnosis-selector select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
-#fetch-evidence-btn { background: var(--primary-gradient); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; transition: var(--transition-bounce); box-shadow: var(--button-shadow); }
-#fetch-evidence-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3); }
-.evidence-container { flex-grow: 1; overflow-y: auto; }
-.evidence-section { margin-bottom: 20px; }
-.evidence-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; }
-.evidence-for { background: var(--success-gradient); color: white; }
-.evidence-against { background: var(--warning-gradient); color: white; }
-.evidence-list { display: flex; flex-direction: column; gap: 8px; }
-.evidence-item { background: rgba(255, 255, 255, 0.8); border-radius: 8px; padding: 12px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: var(--transition-smooth); }
-.evidence-item:hover { transform: translateX(5px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
-.evidence-concept { font-weight: bold; color: #2c3e50; margin-bottom: 4px; }
-.evidence-description { font-size: 13px; color: #666; margin-bottom: 6px; }
-.evidence-importance { font-size: 12px; font-weight: 600; color: var(--blue); }
-.visualizations-container { flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
-.waterfall-section, .heatmaps-section { flex: 1; }
-.viz-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.viz-container { display: flex; justify-content: center; align-items: center; height: 60px; }
-.viz-btn { background: var(--success-gradient); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; cursor: pointer; transition: var(--transition-bounce); box-shadow: var(--button-shadow); }
-.viz-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4); }
-.heatmaps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.heatmap-btn { background: var(--secondary-gradient); color: white; border: none; padding: 8px 12px; border-radius: 15px; font-weight: 600; font-size: 12px; cursor: pointer; transition: var(--transition-bounce); box-shadow: 0 3px 10px rgba(245, 87, 108, 0.3); }
-.heatmap-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4); }
-.modal { position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s ease-out; }
-.modal-content { position: relative; background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%); margin: 5% auto; padding: 30px; width: 80%; max-width: 800px; border-radius: 20px; box-shadow: var(--card-shadow-hover); animation: scaleIn 0.3s ease-out; }
-.modal-close { position: absolute; right: 20px; top: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; transition: var(--transition-smooth); }
-.modal-close:hover { color: var(--orange); transform: scale(1.2); }
-.modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.modal-body { text-align: center; padding: 20px; background: rgba(102, 126, 234, 0.05); border-radius: 15px; border: 2px dashed var(--blue); color: #666; font-style: italic; }
 
 footer .progress-text {
     position: absolute;
@@ -461,47 +333,28 @@ footer .progress-text {
     display: flex;
     width: 100%;                 /* Ensure card width matches the width of column 2 */
     gap: 1px;                    /* 5px gap between elements */
-    padding: 25px;
+    padding-left: 15px;
+    padding-top: 15px;
     height: var(--row1-card-height);              /* Fixed height */
     box-sizing: border-box;      /* Ensures padding and border are included in width */
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     flex-direction: column;
-    border: none;
+    border: 1px solid #ccc;
     overflow:hidden;
-    transition: var(--transition-smooth);
-    animation: slideInFromLeft 0.6s ease-out;
 }
-
-.card-row1-col1:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-@keyframes slideInFromLeft {
-    from { transform: translateX(-50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
 .card-row2-col1 {
     display: grid;
     gap: 1px;                    /* 5px gap between elements */
     width: 97.5%;                 /* Ensure card width matches the width of column 2 */
     height: var(--row2-card-height);              /* Fixed height */
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     overflow: hidden;
-    border: none;   /* Border around the entire card */
+    border: 1px solid #ccc;   /* Border around the entire card */
     margin-left:10px;
-    transition: var(--transition-smooth);
-    animation: slideInFromBottom 0.6s ease-out 0.2s both;
-}
-
-.card-row2-col1:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--card-shadow-hover);
 }
 
 .card-row2-col2 {
@@ -509,41 +362,20 @@ footer .progress-text {
     gap: 1px;                    /* 5px gap between elements */
     width: 97.5%;                 /* Ensure card width matches the width of column 2 */
     height: var(--row2-card-height);              /* Fixed height */
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
-    border: none;   /* Border around the entire card */
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid #ccc;   /* Border around the entire card */
     overflow: hidden;
-    transition: var(--transition-smooth);
-    animation: slideInFromBottom 0.6s ease-out 0.4s both;
-}
-
-.card-row2-col2:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-@keyframes slideInFromBottom {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }
 
 /* Card Title */
 .card-row1-col1 .title {
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 22px;
+    color: #555;
+    font-size: 20px;
     margin: 0;
     font-weight: bold;
     margin-bottom: 20px;
-    animation: titleGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlow {
-    from { filter: brightness(1); }
-    to { filter: brightness(1.2); }
 }
 
 /* Numbered Biomarkers List */
@@ -560,17 +392,8 @@ footer .progress-text {
     font-size: 20px;
     margin: 0;
     font-weight: bold;
-    background: var(--warning-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--orange);
     margin-top: var(--warning-title-y-placement);
-    animation: warningPulse 2s ease-in-out infinite;
-}
-
-@keyframes warningPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
 }
 
 /* Warning Text */

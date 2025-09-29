@@ -100,8 +100,8 @@ function set_patient_id(id)
     patient_id2.textContent = "Patient ID: " + id.toString();
     
     // Notify interactive features of the current patient
-    if (typeof interactiveFeatures !== 'undefined') {
-        interactiveFeatures.setCurrentPatientId(id.toString());
+    if (window.interactiveFeatures) {
+        window.interactiveFeatures.setCurrentPatientId(id.toString());
     }
 }
 
@@ -426,7 +426,13 @@ async function load_json_data() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM Content Loaded - initializing components');
     await load_json_data();
+    
+    // Initialize interactive features after DOM is ready
+    console.log('About to create InteractiveFeatures instance');
+    window.interactiveFeatures = new InteractiveFeatures();
+    console.log('InteractiveFeatures instance created:', window.interactiveFeatures);
 });
 
 button_next.addEventListener("click", function() {
@@ -445,12 +451,25 @@ class InteractiveFeatures {
     }
 
     initializeEventListeners() {
+        console.log('InteractiveFeatures: Initializing event listeners');
+        
         // Evidence fetching
         const fetchEvidenceBtn = document.getElementById('fetch-evidence-btn');
         const diagnosisSelect = document.getElementById('evidence-diagnosis');
         
+        console.log('InteractiveFeatures: Found elements', {
+            fetchEvidenceBtn: !!fetchEvidenceBtn,
+            diagnosisSelect: !!diagnosisSelect
+        });
+        
         if (fetchEvidenceBtn) {
-            fetchEvidenceBtn.addEventListener('click', () => this.fetchEvidence());
+            console.log('InteractiveFeatures: Adding click listener to fetch button');
+            fetchEvidenceBtn.addEventListener('click', () => {
+                console.log('InteractiveFeatures: Fetch evidence button clicked!');
+                this.fetchEvidence();
+            });
+        } else {
+            console.error('InteractiveFeatures: fetch-evidence-btn not found!');
         }
 
         if (diagnosisSelect) {
@@ -499,14 +518,28 @@ class InteractiveFeatures {
     }
 
     async fetchEvidence() {
+        console.log('InteractiveFeatures: fetchEvidence called');
+        
         const diagnosisSelect = document.getElementById('evidence-diagnosis');
         const evidenceContainer = document.getElementById('evidence-container');
         const fetchBtn = document.getElementById('fetch-evidence-btn');
 
-        if (!diagnosisSelect || !evidenceContainer || !fetchBtn) return;
+        console.log('InteractiveFeatures: Elements check', {
+            diagnosisSelect: !!diagnosisSelect,
+            evidenceContainer: !!evidenceContainer,
+            fetchBtn: !!fetchBtn
+        });
+
+        if (!diagnosisSelect || !evidenceContainer || !fetchBtn) {
+            console.error('InteractiveFeatures: Missing required elements');
+            return;
+        }
 
         const diagnosis = diagnosisSelect.value;
+        console.log('InteractiveFeatures: Selected diagnosis:', diagnosis);
+        
         if (!diagnosis) {
+            console.log('InteractiveFeatures: No diagnosis selected');
             alert('Please select a diagnosis first');
             return;
         }
@@ -523,8 +556,18 @@ class InteractiveFeatures {
             }
 
             const data = await response.json();
+            console.log('InteractiveFeatures: Received data from server:', data);
+            
             this.displayEvidence(data);
+            
+            console.log('InteractiveFeatures: Setting evidenceContainer display to block');
             evidenceContainer.style.display = 'block';
+            
+            // Add a temporary visual indicator
+            evidenceContainer.style.border = '2px solid red';
+            evidenceContainer.style.background = 'rgba(255, 255, 0, 0.1)';
+            
+            console.log('InteractiveFeatures: evidenceContainer display set. Current style:', evidenceContainer.style.cssText);
 
         } catch (error) {
             console.error('Error fetching evidence:', error);
@@ -536,26 +579,44 @@ class InteractiveFeatures {
     }
 
     displayEvidence(data) {
+        console.log('InteractiveFeatures: displayEvidence called with data:', data);
+        
         const evidenceForList = document.getElementById('evidence-for-list');
         const evidenceAgainstList = document.getElementById('evidence-against-list');
 
-        if (!evidenceForList || !evidenceAgainstList) return;
+        console.log('InteractiveFeatures: Evidence list elements', {
+            evidenceForList: !!evidenceForList,
+            evidenceAgainstList: !!evidenceAgainstList
+        });
+
+        if (!evidenceForList || !evidenceAgainstList) {
+            console.error('InteractiveFeatures: Evidence list elements not found');
+            return;
+        }
 
         // Clear existing content
         evidenceForList.innerHTML = '';
         evidenceAgainstList.innerHTML = '';
 
+        console.log('InteractiveFeatures: Processing evidence items');
+        console.log('Evidence For items:', data.evidenceFor?.length);
+        console.log('Evidence Against items:', data.evidenceAgainst?.length);
+
         // Display evidence for
-        data.evidenceFor.forEach(item => {
+        data.evidenceFor.forEach((item, index) => {
+            console.log(`Creating evidence FOR item ${index}:`, item);
             const evidenceItem = this.createEvidenceItem(item);
             evidenceForList.appendChild(evidenceItem);
         });
 
         // Display evidence against
-        data.evidenceAgainst.forEach(item => {
+        data.evidenceAgainst.forEach((item, index) => {
+            console.log(`Creating evidence AGAINST item ${index}:`, item);
             const evidenceItem = this.createEvidenceItem(item);
             evidenceAgainstList.appendChild(evidenceItem);
         });
+
+        console.log('InteractiveFeatures: Evidence display completed');
     }
 
     createEvidenceItem(item) {
@@ -632,8 +693,7 @@ class InteractiveFeatures {
     }
 }
 
-// Initialize interactive features
-const interactiveFeatures = new InteractiveFeatures();
+// Interactive features are now initialized in DOMContentLoaded event
 
 
 

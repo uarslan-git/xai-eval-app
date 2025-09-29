@@ -78,59 +78,8 @@
                     </div>
                 </div>
 		</div> 	<!-- <div class="card-row2-col2"> -->
-	</div> 		<!-- <div class="main-row2"> -->
+	</div> 		<!-- <div class="main-row2"> --> 
 
-        <!-- New Interactive Features Row -->
-        <div class="main-row3">
-            <!-- Evidence Panel -->
-            <div class="card-row3-col1">
-                <h3 class="title">Diagnostic Evidence</h3>
-                <div class="diagnosis-selector">
-                    <label for="evidence-diagnosis">View evidence for:</label>
-                    <select id="evidence-diagnosis">
-                        <option value="">Select diagnosis...</option>
-                        <option value="healthy">Healthy</option>
-                        <option value="unhealthy">OCDegen</option>
-                    </select>
-                    <button id="fetch-evidence-btn">Get Evidence</button>
-                </div>
-                
-                <div id="evidence-container" class="evidence-container" style="display: none;">
-                    <div class="evidence-section">
-                        <h4 class="evidence-title evidence-for">Evidence For</h4>
-                        <div id="evidence-for-list" class="evidence-list"></div>
-                    </div>
-                    
-                    <div class="evidence-section">
-                        <h4 class="evidence-title evidence-against">Evidence Against</h4>
-                        <div id="evidence-against-list" class="evidence-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SHAP Visualizations Panel -->
-            <div class="card-row3-col2">
-                <h3 class="title">Model Explanations</h3>
-                <div class="visualizations-container">
-                    <div class="waterfall-section">
-                        <h4 class="viz-title">Waterfall Plot</h4>
-                        <div id="waterfall-container" class="viz-container">
-                            <button id="view-waterfall-btn" class="viz-btn">View Waterfall Plot</button>
-                        </div>
-                    </div>
-                    
-                    <div class="heatmaps-section">
-                        <h4 class="viz-title">Model Heatmaps</h4>
-                        <div id="heatmaps-container" class="heatmaps-grid">
-                            <button class="heatmap-btn" data-heatmap="1">Heatmap 1</button>
-                            <button class="heatmap-btn" data-heatmap="2">Heatmap 2</button>
-                            <button class="heatmap-btn" data-heatmap="3">Heatmap 3</button>
-                            <button class="heatmap-btn" data-heatmap="4">Heatmap 4</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> 		<!-- <div class="main-row3"> -->
 
         <!-- Modal for viewing visualizations -->
         <div id="visualization-modal" class="modal" style="display: none;">

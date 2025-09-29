@@ -488,6 +488,8 @@ footer .progress-bar {
 .evidence-container {
     flex-grow: 1;
     overflow-y: auto;
+    max-height: 300px; /* Ensure it has a reasonable max height */
+    min-height: 100px; /* Ensure it has some minimum height */
 }
 
 .evidence-section {
@@ -519,12 +521,13 @@ footer .progress-bar {
 }
 
 .evidence-item {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 8px;
     padding: 12px;
     margin-bottom: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: var(--transition-smooth);
+    border: 1px solid #e0e0e0; /* Add a subtle border for visibility */
 }
 
 .evidence-item:hover {

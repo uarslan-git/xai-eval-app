@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Evidence API</title>
+</head>
+<body>
+    <h1>Test Evidence API</h1>
+    
+    <div>
+        <button onclick="testAPI()">Test Basic API</button>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <label for="diagnosis">Diagnosis:</label>
+        <select id="diagnosis">
+            <option value="">Select...</option>
+            <option value="healthy">Healthy</option>
+            <option value="unhealthy">OCDegen</option>
+        </select>
+        <button onclick="testEvidence()">Test Evidence API</button>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testEvidence() {
+            const diagnosis = document.getElementById('diagnosis').value;
+            const resultDiv = document.getElementById('result');
+            
+            console.log('Test function called, diagnosis:', diagnosis);
+            
+            if (!diagnosis) {
+                resultDiv.innerHTML = '<p style="color: red;">Please select a diagnosis</p>';
+                return;
+            }
+            
+            try {
+                resultDiv.innerHTML = '<p>Loading...</p>';
+                
+                console.log('Making fetch request...');
+                const response = await fetch(`/api/evidence?diagnosis=${diagnosis}&patientId=test123`);
+                
+                console.log('Response received:', response);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data parsed:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>API Response Success!</h3>
+                    <h4>Evidence For:</h4>
+                    <ul>
+                        ${data.evidenceFor.map(item => `
+                            <li><strong>${item.concept}</strong> (${Math.round(item.importance * 100)}%): ${item.description}</li>
+                        `).join('')}
+                    </ul>
+                    <h4>Evidence Against:</h4>
+                    <ul>
+                        ${data.evidenceAgainst.map(item => `
+                            <li><strong>${item.concept}</strong> (${Math.round(item.importance * 100)}%): ${item.description}</li>
+                        `).join('')}
+                    </ul>
+                    <h4>Raw Response:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+        
+        // Also add a simple test for the test endpoint
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = '<p>Testing basic API...</p>';
+                
+                const response = await fetch('/api/test');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h3>Basic API Test Success!</h3>
+                    <p>Response: ${JSON.stringify(data)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">API Test Error: ${error.message}</p>`;
+                console.error('API Test Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

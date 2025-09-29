@@ -285,85 +285,95 @@ function cb_event_get_study_details(req, res) {
 }
 */
 
-// Mock evidence data for different diagnoses
-const mockEvidenceData = {
-    healthy: {
-        evidenceFor: [
-            { concept: "Clear Lung Fields", importance: 0.92, description: "No signs of opacity or consolidation" },
-            { concept: "Normal Heart Size", importance: 0.87, description: "Heart within normal limits" },
-            { concept: "Sharp Costophrenic Angles", importance: 0.84, description: "No pleural effusion detected" },
-            { concept: "Normal Bone Structure", importance: 0.79, description: "No fractures or abnormalities" }
-        ],
-        evidenceAgainst: [
-            { concept: "Minor Artifacts", importance: 0.23, description: "Some imaging artifacts present" },
-            { concept: "Age-related Changes", importance: 0.15, description: "Minimal age-related bone changes" }
-        ]
-    },
-    unhealthy: {
-        evidenceFor: [
-            { concept: "Strong Spine Bend", importance: 0.95, description: "Significant spinal curvature detected" },
-            { concept: "Bone Variation", importance: 0.89, description: "Abnormal bone density patterns" },
-            { concept: "Tucked Head Position", importance: 0.83, description: "Unusual head positioning" },
-            { concept: "Main Bones Mutation", importance: 0.78, description: "Structural bone abnormalities" }
-        ],
-        evidenceAgainst: [
-            { concept: "Partial Normal Areas", importance: 0.34, description: "Some regions appear normal" },
-            { concept: "Unclear Boundaries", importance: 0.27, description: "Some diagnostic uncertainty" },
-            { concept: "Image Quality", importance: 0.19, description: "Possible image quality issues" }
-        ]
-    }
-};
-
-// API endpoint to get evidence for a specific diagnosis
+// Mock API endpoints for evidence and visualizations
 function cb_event_get_evidence(req, res) {
     const { diagnosis, patientId } = req.query;
     
-    console.log(`Fetching evidence for diagnosis: ${diagnosis}, patient: ${patientId}`);
+    console.log(`[EVIDENCE API] Request received - diagnosis: ${diagnosis}, patient: ${patientId}`);
+    console.log(`[EVIDENCE API] Full query params:`, req.query);
     
-    if (!diagnosis || !mockEvidenceData[diagnosis.toLowerCase()]) {
-        return res.status(400).json({ error: "Invalid diagnosis. Use 'healthy' or 'unhealthy'" });
-    }
-    
-    const evidence = mockEvidenceData[diagnosis.toLowerCase()];
-    
-    // Add some randomization to make it feel more dynamic
-    const randomizedEvidence = {
-        evidenceFor: evidence.evidenceFor.map(item => ({
-            ...item,
-            importance: Math.max(0.1, item.importance + (Math.random() - 0.5) * 0.1)
-        })),
-        evidenceAgainst: evidence.evidenceAgainst.map(item => ({
-            ...item,
-            importance: Math.max(0.1, item.importance + (Math.random() - 0.5) * 0.1)
-        }))
-    };
-    
-    res.json({
-        diagnosis,
-        patientId,
-        ...randomizedEvidence
-    });
-}
-
-// API endpoint to get available SHAP visualizations for a patient
-function cb_event_get_shap_visualizations(req, res) {
-    const { patientId } = req.query;
-    
-    console.log(`Fetching SHAP visualizations for patient: ${patientId}`);
-    
-    // Mock SHAP visualization data
-    const shapData = {
-        patientId,
-        waterfallPlot: `/visualizations/patient_${patientId}/waterfall.png`,
-        heatmaps: [
-            `/visualizations/patient_${patientId}/heatmap_1.png`,
-            `/visualizations/patient_${patientId}/heatmap_2.png`,
-            `/visualizations/patient_${patientId}/heatmap_3.png`,
-            `/visualizations/patient_${patientId}/heatmap_4.png`
+    // Mock evidence data - this would typically come from your AI model
+    const mockEvidence = {
+        evidenceFor: [
+            {
+                concept: "Bone Density Analysis",
+                importance: 0.85,
+                description: "High bone density consistent with healthy tissue structure"
+            },
+            {
+                concept: "Joint Alignment",
+                importance: 0.72,
+                description: "Normal joint spacing and alignment patterns observed"
+            },
+            {
+                concept: "Cortical Thickness",
+                importance: 0.68,
+                description: "Appropriate cortical bone thickness for patient age"
+            }
+        ],
+        evidenceAgainst: [
+            {
+                concept: "Shadow Artifacts",
+                importance: 0.35,
+                description: "Minor imaging artifacts present in some regions"
+            },
+            {
+                concept: "Age-related Changes",
+                importance: 0.19,
+                description: "Minimal age-related bone changes detected"
+            }
         ]
     };
     
-    res.json(shapData);
+    // Adjust evidence based on diagnosis
+    if (diagnosis === 'unhealthy') {
+        mockEvidence.evidenceFor = [
+            {
+                concept: "Bone Degeneration",
+                importance: 0.92,
+                description: "Clear signs of OCDegen with characteristic bone deterioration"
+            },
+            {
+                concept: "Joint Space Narrowing",
+                importance: 0.78,
+                description: "Significant reduction in joint space indicating disease progression"
+            },
+            {
+                concept: "Cortical Thinning",
+                importance: 0.71,
+                description: "Notable thinning of cortical bone structure"
+            }
+        ];
+        mockEvidence.evidenceAgainst = [
+            {
+                concept: "Partial Preservation",
+                importance: 0.45,
+                description: "Some areas show preserved bone structure"
+            },
+            {
+                concept: "Imaging Quality",
+                importance: 0.23,
+                description: "Image quality may affect precise diagnosis"
+            }
+        ];
+    }
+    
+    console.log(`[EVIDENCE API] Sending response:`, mockEvidence);
+    res.json(mockEvidence);
+}
+
+function cb_event_get_heatmap(req, res) {
+    const { imageId } = req.params;
+    
+    console.log(`Fetching heatmap for image: ${imageId}`);
+    
+    // For now, return a placeholder response
+    // In a real implementation, you would serve the actual heatmap image
+    res.json({
+        message: "Heatmap endpoint - would serve actual heatmap image",
+        imageId: imageId,
+        url: `/visualizations/patient_${imageId}/heatmap_1.png`
+    });
 }
 
 init();
@@ -371,8 +381,17 @@ register_post_event("/db_validation_participant_id_and_study_id", cb_event_db_va
 register_post_event("/write_db", cb_event_write_db);
 register_get_event("/read_db", cb_event_read_db);
 register_get_event("/read_db_prev", cb_event_read_db_prev);
+
+// Simple test endpoint
+function cb_event_test_api(req, res) {
+    res.json({ message: "API is working!", timestamp: new Date().toISOString() });
+}
+
+// Register mock API endpoints
+register_get_event("/api/test", cb_event_test_api);
 register_get_event("/api/evidence", cb_event_get_evidence);
-register_get_event("/api/shap-visualizations", cb_event_get_shap_visualizations);
+register_get_event("/api/heatmap/:imageId", cb_event_get_heatmap);
+
 //register_get_event("/read_db_get_last_updated_page_nr", cb_event_get_last_updated_page_nr);
 //register_get_event("/read_db_get_study_details", cb_event_get_study_details);
 

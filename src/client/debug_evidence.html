@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Evidence Display</title>
+    <style>
+        .debug-container {
+            border: 2px solid red;
+            margin: 20px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .evidence-container {
+            border: 2px solid blue !important;
+            background: lightblue !important;
+            padding: 10px !important;
+            margin: 10px 0 !important;
+        }
+        
+        .evidence-item {
+            border: 1px solid green !important;
+            background: lightgreen !important;
+            padding: 8px !important;
+            margin: 5px 0 !important;
+        }
+        
+        .evidence-section {
+            border: 1px solid orange !important;
+            background: lightyellow !important;
+            margin: 5px 0 !important;
+            padding: 5px !important;
+        }
+        
+        #evidence-for-list, #evidence-against-list {
+            border: 1px dashed purple !important;
+            background: lavender !important;
+            min-height: 50px !important;
+            padding: 10px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Debug Evidence Display</h1>
+        
+        <select id="evidence-diagnosis">
+            <option value="">Select diagnosis...</option>
+            <option value="healthy">Healthy</option>
+            <option value="unhealthy">OCDegen</option>
+        </select>
+        <button id="fetch-evidence-btn" onclick="testEvidence()">Get Evidence</button>
+        
+        <div id="evidence-container" class="evidence-container" style="display: none;">
+            <div class="evidence-section">
+                <h4 class="evidence-title evidence-for">Evidence For</h4>
+                <div id="evidence-for-list" class="evidence-list"></div>
+            </div>
+            
+            <div class="evidence-section">
+                <h4 class="evidence-title evidence-against">Evidence Against</h4>
+                <div id="evidence-against-list" class="evidence-list"></div>
+            </div>
+        </div>
+        
+        <div id="debug-output"></div>
+    </div>
+    
+    <script>
+        async function testEvidence() {
+            const debugOutput = document.getElementById('debug-output');
+            const diagnosisSelect = document.getElementById('evidence-diagnosis');
+            const evidenceContainer = document.getElementById('evidence-container');
+            const fetchBtn = document.getElementById('fetch-evidence-btn');
+
+            debugOutput.innerHTML = '<p>Starting test...</p>';
+            
+            const diagnosis = diagnosisSelect.value;
+            if (!diagnosis) {
+                debugOutput.innerHTML += '<p style="color: red;">No diagnosis selected</p>';
+                return;
+            }
+
+            fetchBtn.textContent = 'Loading...';
+            fetchBtn.disabled = true;
+
+            try {
+                debugOutput.innerHTML += `<p>Fetching evidence for: ${diagnosis}</p>`;
+                
+                const response = await fetch(`/api/evidence?diagnosis=${diagnosis}&patientId=debug123`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                debugOutput.innerHTML += `<p>Data received: ${JSON.stringify(data, null, 2)}</p>`;
+                
+                // Clear existing content
+                const evidenceForList = document.getElementById('evidence-for-list');
+                const evidenceAgainstList = document.getElementById('evidence-against-list');
+                
+                evidenceForList.innerHTML = '';
+                evidenceAgainstList.innerHTML = '';
+                
+                debugOutput.innerHTML += `<p>Cleared existing content</p>`;
+
+                // Display evidence for
+                data.evidenceFor.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'evidence-item';
+                    div.innerHTML = `
+                        <div class="evidence-concept">${item.concept}</div>
+                        <div class="evidence-description">${item.description}</div>
+                        <div class="evidence-importance">Importance: ${Math.round(item.importance * 100)}%</div>
+                    `;
+                    evidenceForList.appendChild(div);
+                    debugOutput.innerHTML += `<p>Added FOR item ${index}: ${item.concept}</p>`;
+                });
+
+                // Display evidence against
+                data.evidenceAgainst.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'evidence-item';
+                    div.innerHTML = `
+                        <div class="evidence-concept">${item.concept}</div>
+                        <div class="evidence-description">${item.description}</div>
+                        <div class="evidence-importance">Importance: ${Math.round(item.importance * 100)}%</div>
+                    `;
+                    evidenceAgainstList.appendChild(div);
+                    debugOutput.innerHTML += `<p>Added AGAINST item ${index}: ${item.concept}</p>`;
+                });
+
+                evidenceContainer.style.display = 'block';
+                debugOutput.innerHTML += `<p>Evidence container displayed</p>`;
+
+            } catch (error) {
+                debugOutput.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                fetchBtn.textContent = 'Get Evidence';
+                fetchBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
