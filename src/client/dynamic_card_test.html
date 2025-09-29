@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Card Growth Test</title>
+    <link rel="stylesheet" href="study_id_1/index.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e8f4ff;
+            border-radius: 8px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #5a6fd8;
+        }
+        
+        .content-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .content-item h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .content-item p {
+            margin: 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Dynamic Card Growth Test</h1>
+        <p>This test demonstrates how cards now dynamically size based on their content.</p>
+        
+        <div class="test-controls">
+            <h3>Test Controls:</h3>
+            <button onclick="addContent('card1')">Add Content to Card 1</button>
+            <button onclick="addContent('card2')">Add Content to Card 2</button>
+            <button onclick="addContent('card3')">Add Content to Card 3</button>
+            <button onclick="clearContent('card1')">Clear Card 1</button>
+            <button onclick="clearContent('card2')">Clear Card 2</button>
+            <button onclick="clearContent('card3')">Clear Card 3</button>
+        </div>
+        
+        <main>
+            <!-- Row 1 -->
+            <div class="main-row1">
+                <div class="card-row1-col1" id="card1">
+                    <h3 class="title">Dynamic Card 1</h3>
+                    <div id="card1-content">
+                        <div class="content-item">
+                            <h4>Initial Content</h4>
+                            <p>This card will grow as you add more content.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-row1-col2-3-4-5">
+                    <div class="title">Patient X-Ray</div>
+                    <img class="image" src="/input/img/00.png" alt="X-Ray Image">
+                    <div class="caption">
+                        <p><strong>Location:</strong> Sample Location</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Row 2 -->
+            <div class="main-row2">
+                <div class="card-row2-col1" id="card2">
+                    <h3 class="title">Dynamic Card 2</h3>
+                    <div id="card2-content">
+                        <div class="content-item">
+                            <h4>Row 2 Content</h4>
+                            <p>This card is in the second row and also grows dynamically.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-row2-col2">
+                    <div class="title">Diagnosis Options</div>
+                    <div style="padding: 20px;">
+                        <label style="display: block; margin: 10px 0;">
+                            <input type="radio" name="diagnosis" value="healthy"> Healthy
+                        </label>
+                        <label style="display: block; margin: 10px 0;">
+                            <input type="radio" name="diagnosis" value="unhealthy"> OCDegen
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Row 3 -->
+            <div class="main-row3">
+                <div class="card-row3-col1" id="card3">
+                    <h3 class="title">Dynamic Card 3</h3>
+                    <div id="card3-content">
+                        <div class="content-item">
+                            <h4>Interactive Content</h4>
+                            <p>This card demonstrates dynamic growth in row 3.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-row3-col2">
+                    <h3 class="title">Visualizations</h3>
+                    <div class="content-item">
+                        <h4>SHAP Analysis</h4>
+                        <p>Model explanation visualizations would appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        let contentCounter = 1;
+        
+        function addContent(cardId) {
+            const contentContainer = document.getElementById(cardId + '-content');
+            const newContent = document.createElement('div');
+            newContent.className = 'content-item';
+            newContent.innerHTML = `
+                <h4>Dynamic Content Item #${contentCounter}</h4>
+                <p>This is additional content added to demonstrate how the card grows dynamically. 
+                The card height adjusts automatically based on the amount of content it contains. 
+                Notice how the entire layout adapts as content is added or removed.</p>
+            `;
+            contentContainer.appendChild(newContent);
+            contentCounter++;
+            
+            // Add animation
+            newContent.style.opacity = '0';
+            newContent.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                newContent.style.transition = 'all 0.3s ease';
+                newContent.style.opacity = '1';
+                newContent.style.transform = 'translateY(0)';
+            }, 50);
+        }
+        
+        function clearContent(cardId) {
+            const contentContainer = document.getElementById(cardId + '-content');
+            const items = contentContainer.querySelectorAll('.content-item');
+            if (items.length > 1) {
+                items[items.length - 1].remove();
+            }
+        }
+    </script>
+</body>
+</html>

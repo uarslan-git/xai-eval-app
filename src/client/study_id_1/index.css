@@ -156,10 +156,10 @@ header > h1{
 main {
     position: relative;
     display: grid;
-    /* Three rows layout: 45% 25% 25% */
-    grid-template-rows: calc(var(--body-height) * 0.45)   /* Main content row */
-                       calc(var(--body-height) * 0.25)   /* Diagnosis row */
-                       calc(var(--body-height) * 0.25);  /* Interactive features row */
+    /* Three rows layout: auto-sizing based on content */
+    grid-template-rows: min-content   /* Main content row - size to fit content */
+                       min-content   /* Diagnosis row - size to fit content */
+                       min-content;  /* Interactive features row - size to fit content */
     column-gap: 15px;
     row-gap: 15px;
     padding: 1rem;
@@ -178,12 +178,12 @@ main {
     background: none;
     border-radius: 8px;
     grid-template-columns: var(--grid-template-row1-columns);  
-    height: var(--row1-height);              /* Fixed height */
+    min-height: calc(var(--body-height) * 0.3);  /* Minimum height, can grow */
     border: var(--border1);
-    overflow: hidden;
+    overflow: visible;           /* Allow content to be visible */
     column-gap: 5px;
     padding: 1rem;
-    align-items: center;
+    align-items: start;          /* Align to start to allow growth */
     justify-content: center;
     /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
 }
@@ -193,11 +193,12 @@ main {
     background: none;
     border-radius: 8px;
     grid-template-columns: var(--grid-template-row2-columns); /*60% 39%*/
-    height: var(--row2-height);              /* Fixed height */
+    min-height: calc(var(--body-height) * 0.2);  /* Minimum height, can grow */
     border: var(--border2);
-    overflow: hidden;
+    overflow: visible;           /* Allow content to be visible */
     column-gap: 1px;
     padding-left: 5px;
+    align-items: start;          /* Align to start to allow growth */
     /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
 }
 
@@ -207,13 +208,13 @@ main {
     width: 100%;                /* Matches the width of the column */
     gap: 1px;                    /* 5px gap between elements */
     
-    height: var(--row1-card-height);              /* Fixed height */
+    min-height: 300px;          /* Minimum height, can grow based on content */
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
-    grid-template-rows: 10% 60% 30%;  /* Row heights as specified */
+    grid-template-rows: auto 1fr auto;  /* Title auto-size, image flexible, caption auto-size */
     border: none;   /* Border around the entire card */
-    overflow: hidden;
+    overflow: visible;          /* Allow content to be visible */
     transition: var(--transition-smooth);
     animation: scaleIn 0.6s ease-out;
 }
@@ -231,7 +232,6 @@ main {
 /* First Row - Patient ID */
 .card-row1-col2-3-4-5 .title {
     color: #555;
-    background: white;
     display: flex;
     text-align: left;
     margin-left: 5px;
@@ -245,13 +245,20 @@ main {
 /* Second Row - Image */
 .card-row1-col2-3-4-5 .image {
     width: 100%;
-    height: 100%;
+    min-height: 200px;          /* Minimum height for the image */
+    max-height: 400px;          /* Maximum height to prevent overgrowth */
     background: none;
     object-fit: contain;
     display: block;
     border-bottom: none;
     justify-content: center;
     align-items: center;
+}
+
+/* Patient X-Ray Image Specific Styling */
+#patient-x-ray-image {
+    margin: auto;
+    width: 25%;
 }
 
 /* Third Row - Text */
@@ -414,11 +421,12 @@ footer .progress-bar {
     background: none;
     border-radius: 8px;
     grid-template-columns: 1fr 1fr;  /* Two equal columns */
-    height: calc(var(--body-height) * 0.25);
+    min-height: calc(var(--body-height) * 0.2);  /* Minimum height, can grow */
     border: var(--border2);
-    overflow: hidden;
+    overflow: visible;           /* Allow content to be visible */
     column-gap: 15px;
     padding: 0;
+    align-items: start;          /* Align to start to allow growth */
     animation: slideInFromBottom 0.8s ease-out 0.6s both;
 }
 
@@ -431,7 +439,8 @@ footer .progress-bar {
     border-radius: 20px;
     padding: 20px;
     border: none;
-    overflow-y: auto;
+    min-height: 200px;          /* Minimum height, can grow based on content */
+    overflow-y: auto;           /* Allow scrolling if content is too tall */
     transition: var(--transition-smooth);
 }
 
@@ -488,8 +497,8 @@ footer .progress-bar {
 .evidence-container {
     flex-grow: 1;
     overflow-y: auto;
-    max-height: 300px; /* Ensure it has a reasonable max height */
-    min-height: 100px; /* Ensure it has some minimum height */
+    max-height: none;           /* Remove max height to allow full growth */
+    min-height: 100px;          /* Minimum height when content is present */
 }
 
 .evidence-section {
@@ -562,7 +571,8 @@ footer .progress-bar {
     border-radius: 20px;
     padding: 20px;
     border: none;
-    overflow-y: auto;
+    min-height: 200px;          /* Minimum height, can grow based on content */
+    overflow-y: auto;           /* Allow scrolling if content is too tall */
     transition: var(--transition-smooth);
 }
 
@@ -718,14 +728,14 @@ footer .progress-text {
     width: 100%;                 /* Ensure card width matches the width of column 2 */
     gap: 1px;                    /* 5px gap between elements */
     padding: 25px;
-    height: var(--row1-card-height);              /* Fixed height */
+    min-height: 200px;           /* Minimum height, can grow based on content */
     box-sizing: border-box;      /* Ensures padding and border are included in width */
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
     flex-direction: column;
     border: none;
-    overflow:hidden;
+    overflow: visible;           /* Allow content to be visible */
     transition: var(--transition-smooth);
     animation: slideInFromLeft 0.6s ease-out;
 }
@@ -743,11 +753,11 @@ footer .progress-text {
     display: grid;
     gap: 1px;                    /* 5px gap between elements */
     width: 97.5%;                 /* Ensure card width matches the width of column 2 */
-    height: var(--row2-card-height);              /* Fixed height */
+    min-height: 150px;           /* Minimum height, can grow based on content */
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
-    overflow: hidden;
+    overflow: visible;           /* Allow content to be visible */
     border: none;   /* Border around the entire card */
     margin-left:10px;
     transition: var(--transition-smooth);
@@ -763,12 +773,12 @@ footer .progress-text {
     display: grid;
     gap: 1px;                    /* 5px gap between elements */
     width: 97.5%;                 /* Ensure card width matches the width of column 2 */
-    height: var(--row2-card-height);              /* Fixed height */
+    min-height: 150px;           /* Minimum height, can grow based on content */
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
     border: none;   /* Border around the entire card */
-    overflow: hidden;
+    overflow: visible;           /* Allow content to be visible */
     transition: var(--transition-smooth);
     animation: slideInFromBottom 0.6s ease-out 0.4s both;
 }
