@@ -475,9 +475,21 @@ class InteractiveFeatures {
         if (diagnosisSelect) {
             diagnosisSelect.addEventListener('change', () => {
                 const evidenceContainer = document.getElementById('evidence-container');
+                const evidenceFilter = document.querySelector('.evidence-filter');
                 if (evidenceContainer) {
                     evidenceContainer.style.display = 'none';
                 }
+                if (evidenceFilter) {
+                    evidenceFilter.style.display = 'none';
+                }
+            });
+        }
+
+        // Evidence type filter
+        const evidenceTypeFilter = document.getElementById('evidence-type-filter');
+        if (evidenceTypeFilter) {
+            evidenceTypeFilter.addEventListener('change', () => {
+                this.filterEvidence();
             });
         }
 
@@ -658,8 +670,12 @@ class InteractiveFeatures {
     displayEvidence(data) {
         console.log('InteractiveFeatures: displayEvidence called with data:', data);
         
+        // Store the original data for filtering
+        this.evidenceData = data;
+        
         const evidenceForList = document.getElementById('evidence-for-list');
         const evidenceAgainstList = document.getElementById('evidence-against-list');
+        const evidenceFilter = document.querySelector('.evidence-filter');
 
         console.log('InteractiveFeatures: Evidence list elements', {
             evidenceForList: !!evidenceForList,
@@ -669,6 +685,11 @@ class InteractiveFeatures {
         if (!evidenceForList || !evidenceAgainstList) {
             console.error('InteractiveFeatures: Evidence list elements not found');
             return;
+        }
+
+        // Show the evidence filter
+        if (evidenceFilter) {
+            evidenceFilter.style.display = 'block';
         }
 
         // Clear existing content
@@ -696,9 +717,43 @@ class InteractiveFeatures {
         console.log('InteractiveFeatures: Evidence display completed');
     }
 
+    filterEvidence() {
+        if (!this.evidenceData) return;
+
+        const filterValue = document.getElementById('evidence-type-filter').value;
+        const evidenceForSection = document.querySelector('.evidence-section:has(.evidence-for)');
+        const evidenceAgainstSection = document.querySelector('.evidence-section:has(.evidence-against)');
+
+        // If querySelector doesn't work with :has, use alternative approach
+        const evidenceForSectionAlt = document.querySelector('.evidence-for').closest('.evidence-section');
+        const evidenceAgainstSectionAlt = document.querySelector('.evidence-against').closest('.evidence-section');
+        
+        const forSection = evidenceForSection || evidenceForSectionAlt;
+        const againstSection = evidenceAgainstSection || evidenceAgainstSectionAlt;
+
+        switch (filterValue) {
+            case 'for':
+                // Show only Evidence For
+                if (forSection) forSection.style.display = 'block';
+                if (againstSection) againstSection.style.display = 'none';
+                break;
+            case 'against':
+                // Show only Evidence Against
+                if (forSection) forSection.style.display = 'none';
+                if (againstSection) againstSection.style.display = 'block';
+                break;
+            case 'all':
+            default:
+                // Show both sections
+                if (forSection) forSection.style.display = 'block';
+                if (againstSection) againstSection.style.display = 'block';
+                break;
+        }
+    }
+
     createEvidenceItem(item) {
         const div = document.createElement('div');
-        div.className = 'evidence-item';
+        div.className = 'evidence-item clickable-evidence';
         
         const importancePercentage = Math.round(item.importance * 100);
         
@@ -706,7 +761,24 @@ class InteractiveFeatures {
             <div class="evidence-concept">${item.concept}</div>
             <div class="evidence-description">${item.description}</div>
             <div class="evidence-importance">Importance: ${importancePercentage}%</div>
+            <div class="evidence-click-hint">💡 Click to view related visualization</div>
         `;
+
+        // Add click handler to trigger visualization
+        div.addEventListener('click', () => {
+            this.triggerRelatedVisualization(item);
+        });
+
+        // Add hover effects
+        div.addEventListener('mouseenter', () => {
+            div.style.transform = 'translateY(-2px)';
+            div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        });
+
+        div.addEventListener('mouseleave', () => {
+            div.style.transform = 'translateY(0)';
+            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        });
 
         // Add animation
         div.style.opacity = '0';
@@ -720,7 +792,86 @@ class InteractiveFeatures {
         return div;
     }
 
-    async viewWaterfallPlot() {
+    triggerRelatedVisualization(evidenceItem) {
+        console.log('Triggering individual SHAP visualization for evidence:', evidenceItem);
+        
+        // Create a visual feedback in the Model Explanations section
+        this.highlightModelExplanations();
+        
+        // Create a unique visualization ID for each evidence concept
+        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
+        
+        // Each evidence item gets its own dedicated SHAP visualization
+        const concept = evidenceItem.concept.toLowerCase();
+        
+        // Neuroimaging-based evidence gets heatmaps (spatial features)
+        if (concept.includes('cortical thickness') || concept.includes('cortical')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'cortical_thickness', 1);
+        } else if (concept.includes('white matter') || concept.includes('connectivity')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'white_matter', 2);
+        } else if (concept.includes('hippocampal') || concept.includes('hippocampus')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'hippocampal_volume', 3);
+        } else if (concept.includes('amygdala')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'amygdala_volume', 4);
+        } else if (concept.includes('ventricular') || concept.includes('ventricle')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'ventricular_volume', 1);
+        } else if (concept.includes('lesion') || concept.includes('abnormality')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'lesion_pattern', 2);
+        
+        // Clinical/demographic features get waterfall plots (feature importance)
+        } else if (concept.includes('age') || concept.includes('demographic')) {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'demographic_age');
+        } else if (concept.includes('cognitive') || concept.includes('mmse') || concept.includes('moca')) {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'cognitive_score');
+        } else if (concept.includes('biomarker') || concept.includes('csf') || concept.includes('plasma')) {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'biomarker_level');
+        } else if (concept.includes('genetic') || concept.includes('apoe')) {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'genetic_factor');
+        } else if (concept.includes('clinical') || concept.includes('symptom')) {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'clinical_symptom');
+        
+        // Catch-all cases for structural features
+        } else if (concept.includes('spine') || concept.includes('bone') || concept.includes('structure')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'structural_feature', 3);
+        } else if (concept.includes('density') || concept.includes('intensity') || concept.includes('pattern')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'intensity_pattern', 4);
+        } else if (concept.includes('shape') || concept.includes('contour') || concept.includes('outline')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'shape_feature', 1);
+        } else if (concept.includes('texture') || concept.includes('surface') || concept.includes('detail')) {
+            this.viewIndividualSHAPHeatmap(evidenceItem, 'texture_feature', 2);
+        
+        // Default case - use waterfall for general feature importance
+        } else {
+            this.viewIndividualSHAPWaterfall(evidenceItem, 'general_feature');
+        }
+    }
+
+    generateEvidenceVisualizationId(evidenceItem) {
+        // Create a unique ID based on concept and importance for caching
+        const conceptKey = evidenceItem.concept.toLowerCase().replace(/\s+/g, '_');
+        const importanceKey = Math.round(evidenceItem.importance * 1000);
+        return `${conceptKey}_${importanceKey}`;
+    }
+
+    highlightModelExplanations() {
+        const modelExplanationsCard = document.querySelector('.card-row3-col2');
+        if (modelExplanationsCard) {
+            // Add highlighting effect
+            modelExplanationsCard.style.border = '3px solid #4facfe';
+            modelExplanationsCard.style.boxShadow = '0 0 20px rgba(79, 172, 254, 0.5)';
+            
+            // Scroll to the model explanations section
+            modelExplanationsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Remove highlighting after 2 seconds
+            setTimeout(() => {
+                modelExplanationsCard.style.border = '';
+                modelExplanationsCard.style.boxShadow = '';
+            }, 2000);
+        }
+    }
+
+    async viewWaterfallPlotWithContext(evidenceItem) {
         const modal = document.getElementById('visualization-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
@@ -729,34 +880,33 @@ class InteractiveFeatures {
 
         const waterfall = this.patientVisualizations?.waterfall;
         
-        modalTitle.textContent = waterfall?.name || 'SHAP Waterfall Plot';
+        modalTitle.textContent = `Feature Importance: ${evidenceItem.concept}`;
         
         if (waterfall && waterfall.url && !waterfall.isMock) {
-            // Show actual image
             modalBody.innerHTML = `
                 <div style="text-align: center;">
-                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                    <img src="${waterfall.url}" alt="SHAP Waterfall Plot" 
-                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
-                         onload="console.log('Waterfall image loaded successfully')"
-                         onerror="console.error('Failed to load waterfall image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="display: none; padding: 20px; color: #666;">
-                        <p>Failed to load waterfall visualization</p>
-                        <p><em>Image path: ${waterfall.url}</em></p>
+                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
                     </div>
+                    <p><strong>SHAP Waterfall Plot - Feature Contributions</strong></p>
+                    <img src="${waterfall.url}" alt="SHAP Waterfall Plot" 
+                         style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                 </div>
             `;
         } else {
-            // Show placeholder
             modalBody.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <p><strong>Waterfall Plot for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
-                        <p style="color: #666; font-size: 18px; margin: 0;">📊</p>
-                        <p style="color: #666; margin: 10px 0;">SHAP Waterfall Visualization</p>
-                        <p style="color: #888; font-size: 14px; margin: 0;">
-                            ${waterfall?.isMock ? 'Mock visualization - actual data not available' : 'No waterfall data available for this patient'}
-                        </p>
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
+                    </div>
+                    <div style="padding: 40px; background: rgba(79, 172, 254, 0.1); border-radius: 15px; border: 2px dashed #4facfe;">
+                        <p><strong>SHAP Waterfall Plot</strong></p>
+                        <p>Shows how each feature contributes to the model's prediction for this specific case.</p>
+                        <p><em>This visualization would show the feature importance breakdown related to: "${evidenceItem.concept}"</em></p>
                     </div>
                 </div>
             `;
@@ -808,6 +958,236 @@ class InteractiveFeatures {
                         <p style="color: #666; margin: 10px 0;">SHAP Heatmap Visualization</p>
                         <p style="color: #888; font-size: 14px; margin: 0;">
                             ${heatmapData?.isMock ? 'Mock visualization - actual data not available' : 'No heatmap data available for this patient'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        modal.style.display = 'block';
+    }
+
+    async viewHeatmapWithContext(heatmapNum, evidenceItem) {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !modalTitle || !modalBody) return;
+
+        // Find the specific heatmap data
+        let heatmapData = null;
+        if (this.patientVisualizations?.heatmaps) {
+            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
+        }
+
+        const title = heatmapData?.name || `SHAP Heatmap ${heatmapNum}`;
+        const imageUrl = heatmapData?.url;
+        
+        modalTitle.textContent = `Visual Attribution: ${evidenceItem.concept}`;
+        
+        if (imageUrl && !heatmapData?.isMock) {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
+                    </div>
+                    <p><strong>${title} - Visual Evidence</strong></p>
+                    <img src="${imageUrl}" alt="${title}" 
+                         style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(255, 107, 107, 0.2); border: 2px solid #ff6b6b;">
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
+                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
+                    </div>
+                    <div style="padding: 40px; background: rgba(255, 107, 107, 0.1); border-radius: 15px; border: 2px dashed #ff6b6b;">
+                        <p><strong>${title}</strong></p>
+                        <p>Visual attention map showing which regions are most important for this prediction.</p>
+                        <p><em>This visualization would highlight areas related to: "${evidenceItem.concept}"</em></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        modal.style.display = 'block';
+    }
+
+    // Individual SHAP Visualization Functions - Each evidence gets its own visualization
+    async viewIndividualSHAPHeatmap(evidenceItem, featureType, heatmapNum = 1) {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !modalTitle || !modalBody) return;
+
+        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
+        
+        // Find the specific heatmap data (or use mock data)
+        let heatmapData = null;
+        if (this.patientVisualizations?.heatmaps) {
+            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
+        }
+
+        const imageUrl = heatmapData?.url;
+        
+        modalTitle.textContent = `SHAP Heatmap: ${evidenceItem.concept}`;
+        
+        // Create evidence-specific content
+        const evidenceTypeColor = evidenceItem.importance > 0 ? '#28a745' : '#dc3545'; // Green for positive, red for negative
+        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
+        
+        if (imageUrl && !heatmapData?.isMock) {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
+                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
+                        </div>
+                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
+                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${evidenceTypeColor};">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">Individual Feature Attribution</h4>
+                        <p style="margin: 0; font-size: 14px; color: #666;">
+                            This heatmap shows exactly how "<strong>${evidenceItem.concept}</strong>" contributes to the model's prediction.
+                            Bright regions indicate areas where this specific feature has the highest impact.
+                        </p>
+                    </div>
+                    
+                    <img src="${imageUrl}" alt="SHAP Heatmap for ${evidenceItem.concept}" 
+                         style="max-width: 100%; max-height: 55vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid ${evidenceTypeColor};">
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
+                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
+                        </div>
+                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
+                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 40px; background: linear-gradient(145deg, ${evidenceTypeColor}15, ${evidenceTypeColor}25); border-radius: 15px; border: 2px dashed ${evidenceTypeColor};">
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 40px;">🔥</span>
+                        </div>
+                        <h4 style="margin: 10px 0; color: #333;">Individual SHAP Heatmap</h4>
+                        <p style="margin: 10px 0; color: #666;">
+                            This visualization would show the specific contribution of "<strong>${evidenceItem.concept}</strong>" 
+                            to the model's prediction for this patient.
+                        </p>
+                        <p style="margin: 0; font-size: 14px; color: #888;">
+                            <em>Feature Type: ${featureType.replace(/_/g, ' ')} | Evidence ID: ${evidenceId.substring(0, 12)}...</em>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        modal.style.display = 'block';
+    }
+
+    async viewIndividualSHAPWaterfall(evidenceItem, featureType) {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !modalTitle || !modalBody) return;
+
+        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
+        
+        const waterfall = this.patientVisualizations?.waterfall;
+        
+        modalTitle.textContent = `SHAP Waterfall: ${evidenceItem.concept}`;
+        
+        // Create evidence-specific content
+        const evidenceTypeColor = evidenceItem.importance > 0 ? '#007bff' : '#fd7e14'; // Blue for positive, orange for negative
+        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
+        
+        if (waterfall && waterfall.url && !waterfall.isMock) {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '📈' : '📉'}</span>
+                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
+                        </div>
+                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
+                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${evidenceTypeColor};">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">Individual Feature Impact</h4>
+                        <p style="margin: 0; font-size: 14px; color: #666;">
+                            This waterfall plot shows how "<strong>${evidenceItem.concept}</strong>" pushes the model's prediction 
+                            ${evidenceItem.importance > 0 ? 'toward' : 'away from'} the positive class.
+                        </p>
+                    </div>
+                    
+                    <img src="${waterfall.url}" alt="SHAP Waterfall for ${evidenceItem.concept}" 
+                         style="max-width: 100%; max-height: 55vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid ${evidenceTypeColor};">
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '📈' : '📉'}</span>
+                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
+                        </div>
+                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
+                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 40px; background: linear-gradient(145deg, ${evidenceTypeColor}15, ${evidenceTypeColor}25); border-radius: 15px; border: 2px dashed ${evidenceTypeColor};">
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 40px;">📊</span>
+                        </div>
+                        <h4 style="margin: 10px 0; color: #333;">Individual SHAP Waterfall</h4>
+                        <p style="margin: 10px 0; color: #666;">
+                            This visualization would show exactly how "<strong>${evidenceItem.concept}</strong>" 
+                            contributes to the final prediction score.
+                        </p>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid ${evidenceTypeColor};">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #333;">Base Rate:</span>
+                                <span style="color: #666;">+0.2</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                <span style="color: ${evidenceTypeColor}; font-weight: bold;">${evidenceItem.concept}:</span>
+                                <span style="color: ${evidenceTypeColor}; font-weight: bold;">${evidenceItem.importance > 0 ? '+' : ''}${(evidenceItem.importance * 0.8).toFixed(3)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px;">
+                                <span style="color: #333; font-weight: bold;">Final Score:</span>
+                                <span style="color: #333; font-weight: bold;">${(0.2 + evidenceItem.importance * 0.8).toFixed(3)}</span>
+                            </div>
+                        </div>
+                        <p style="margin: 0; font-size: 14px; color: #888;">
+                            <em>Feature Type: ${featureType.replace(/_/g, ' ')} | Evidence ID: ${evidenceId.substring(0, 12)}...</em>
                         </p>
                     </div>
                 </div>

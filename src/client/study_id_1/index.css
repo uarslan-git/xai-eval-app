@@ -156,10 +156,12 @@ header > h1{
 main {
     position: relative;
     display: grid;
-    /* Three rows layout: auto-sizing based on content */
-    grid-template-rows: min-content   /* Main content row - size to fit content */
-                       min-content   /* Diagnosis row - size to fit content */
-                       min-content;  /* Interactive features row - size to fit content */
+    /* Five rows layout: auto-sizing based on content */
+    grid-template-rows: min-content   /* Row 1: X-ray image */
+                       min-content   /* Row 2: Interactive features (evidence & visualizations) */
+                       min-content   /* Row 3: OCDegen biomarkers */
+                       min-content   /* Row 4: Final diagnosis info */
+                       min-content;  /* Row 5: User diagnosis selection (very bottom) */
     column-gap: 15px;
     row-gap: 15px;
     padding: 1rem;
@@ -177,29 +179,28 @@ main {
     display: grid;
     background: none;
     border-radius: 8px;
-    grid-template-columns: var(--grid-template-row1-columns);  
-    min-height: calc(var(--body-height) * 0.3);  /* Minimum height, can grow */
+    grid-template-columns: 1fr;  /* Single column for X-ray image only */
+    min-height: calc(var(--body-height) * 0.4);  /* Larger space for image */
     border: var(--border1);
-    overflow: visible;           /* Allow content to be visible */
-    column-gap: 5px;
-    padding: 1rem;
-    align-items: start;          /* Align to start to allow growth */
+    overflow: visible;
+    padding: 0;
+    align-items: center;
     justify-content: center;
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+    animation: slideInFromTop 0.8s ease-out 0.2s both;
 }
 
 .main-row2 {
     display: grid;
     background: none;
     border-radius: 8px;
-    grid-template-columns: var(--grid-template-row2-columns); /*60% 39%*/
-    min-height: calc(var(--body-height) * 0.2);  /* Minimum height, can grow */
+    grid-template-columns: 1fr 1fr;  /* Two equal columns for evidence and visualizations */
+    min-height: calc(var(--body-height) * 0.2);
     border: var(--border2);
-    overflow: visible;           /* Allow content to be visible */
-    column-gap: 1px;
-    padding-left: 5px;
-    align-items: start;          /* Align to start to allow growth */
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/
+    overflow: visible;
+    column-gap: 15px;
+    padding: 0;
+    align-items: start;
+    animation: slideInFromBottom 0.8s ease-out 0.4s both;
 }
 
 /* Card Styles */
@@ -430,6 +431,37 @@ footer .progress-bar {
     animation: slideInFromBottom 0.8s ease-out 0.6s both;
 }
 
+/* Main Row 4 - OCDegen Biomarkers (moved to bottom, smaller) */
+.main-row4 {
+    display: grid;
+    background: none;
+    border-radius: 8px;
+    grid-template-columns: 1fr;  /* Single column, smaller */
+    min-height: calc(var(--body-height) * 0.15);  /* Smaller height */
+    border: var(--border1);
+    overflow: visible;
+    column-gap: 15px;
+    padding: 0;
+    align-items: start;
+    animation: slideInFromBottom 0.8s ease-out 0.8s both;
+}
+
+/* Main Row 5 - User Diagnosis Selection (very bottom) */
+.main-row5 {
+    display: grid;
+    background: none;
+    border-radius: 8px;
+    grid-template-columns: 1fr;  /* Single column */
+    min-height: calc(var(--body-height) * 0.15);
+    border: var(--border1);
+    overflow: visible;
+    column-gap: 15px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    animation: slideInFromBottom 0.8s ease-out 1.2s both;
+}
+
 /* Evidence Panel */
 .card-row3-col1 {
     display: flex;
@@ -454,7 +486,30 @@ footer .progress-bar {
     align-items: center;
     gap: 10px;
     margin-bottom: 15px;
-    flex-wrap: wrap;
+}
+
+.evidence-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(0, 123, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+}
+
+.evidence-filter label {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.evidence-filter select {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
 }
 
 .diagnosis-selector label {
@@ -536,7 +591,8 @@ footer .progress-bar {
     margin-bottom: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: var(--transition-smooth);
-    border: 1px solid #e0e0e0; /* Add a subtle border for visibility */
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
 }
 
 .evidence-item:hover {
@@ -722,22 +778,188 @@ footer .progress-text {
     pointer-events: none;  /* Makes the text unclickable */
 }
 
+/* Main Row 4 - OCDegen Biomarkers (moved from row 1) */
+.main-row4 {
+    display: grid;
+    background: none;
+    border-radius: 8px;
+    grid-template-columns: 1fr;  /* Single column layout */
+    min-height: calc(var(--body-height) * 0.15);  /* Smaller than original */
+    border: var(--border2);
+    overflow: visible;
+    column-gap: 15px;
+    padding: 0;
+    align-items: start;
+    animation: slideInFromBottom 0.8s ease-out 0.8s both;
+}
+
+/* OCDegen Biomarkers Card - Smaller Version */
+.card-row4-col1 {
+    display: flex;
+    width: 100%;
+    gap: 1px;
+    padding: 15px;  /* Reduced from 25px */
+    min-height: 120px;  /* Reduced from 200px */
+    box-sizing: border-box;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 15px;  /* Slightly smaller border radius */
+    flex-direction: column;
+    border: none;
+    overflow: visible;
+    transition: var(--transition-smooth);
+    animation: slideInFromLeft 0.6s ease-out 0.8s both;
+    margin: 0 auto;  /* Center the card */
+    max-width: 600px;  /* Limit width to make it smaller */
+}
+
+.card-row4-col1:hover {
+    transform: translateY(-3px);  /* Smaller lift effect */
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Card Title - Smaller */
+.card-row4-col1 .title {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 18px;  /* Reduced from 22px */
+    margin: 0;
+    font-weight: bold;
+    margin-bottom: 10px;  /* Reduced from 20px */
+    animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+/* Numbered Biomarkers List - Smaller */
+.card-row4-col1 .biomarkers-list {
+    color: #555;
+    list-style-type: decimal;
+    padding-left: 20px;
+    margin: 0;
+    font-size: 14px;  /* Reduced from 16px */
+}
+
+/* Warning Title - Smaller */
+.card-row4-col1 .card-warning {
+    font-size: 16px;  /* Reduced from 20px */
+    margin: 0;
+    font-weight: bold;
+    background: var(--warning-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 20px;  /* Reduced spacing */
+    animation: warningPulse 2s ease-in-out infinite;
+}
+
+/* Warning Text - Smaller */
+.card-row4-col1 .card-warning-text {
+    color: #555;
+    font-size: 11px;  /* Reduced from 12px */
+    margin: 0;
+    line-height: 1.4;  /* Slightly tighter line height */
+    margin-top: 5px;
+}
+
+/* Card Row 5 Col 1 - Final Diagnosis Info (very bottom) */
+.card-row5-col1 {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, #e8f4fd 0%, #d1ecf1 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 15px;
+    padding: 15px;
+    border: none;
+    min-height: 80px;
+    overflow: visible;
+    transition: var(--transition-smooth);
+    animation: slideInFromBottom 0.8s ease-out 1.0s both;
+}
+
+.card-row5-col1:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card-row5-col1 .title {
+    color: #2c3e50;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.diagnosis-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.diagnosis-info p {
+    margin: 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.diagnosis-info .healthy {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.diagnosis-info .unhealthy {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Card Row 5 Col 1 - User Diagnosis Selection (bottom) */
+.card-row5-col1-diagnosis {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 150px;
+    padding: 25px;
+    background: linear-gradient(145deg, #ffffff 0%, #f0f8ff 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    border: none;
+    overflow: visible;
+    transition: var(--transition-smooth);
+    animation: slideInFromBottom 0.6s ease-out 1.2s both;
+    text-align: center;
+}
+
+.card-row5-col1-diagnosis:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card-row5-col1-diagnosis .title {
+    color: #2c3e50;
+    font-size: 20px;
+    margin: 0 0 20px 0;
+    font-weight: bold;
+}
+
 /* Text Card Styles */
+/* Card Row 1 Col 1 - X-ray Image Only */
 .card-row1-col1 {
     display: flex;
-    width: 100%;                 /* Ensure card width matches the width of column 2 */
-    gap: 1px;                    /* 5px gap between elements */
-    padding: 25px;
-    min-height: 200px;           /* Minimum height, can grow based on content */
-    box-sizing: border-box;      /* Ensures padding and border are included in width */
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+    min-height: 300px;
+    box-sizing: border-box;
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
-    flex-direction: column;
     border: none;
-    overflow: visible;           /* Allow content to be visible */
+    overflow: visible;
     transition: var(--transition-smooth);
-    animation: slideInFromLeft 0.6s ease-out;
+    animation: slideInFromTop 0.6s ease-out;
+    align-items: center;
+    justify-content: center;
 }
 
 .card-row1-col1:hover {
@@ -769,23 +991,90 @@ footer .progress-text {
     box-shadow: var(--card-shadow-hover);
 }
 
-.card-row2-col2 {
-    display: grid;
-    gap: 1px;                    /* 5px gap between elements */
-    width: 97.5%;                 /* Ensure card width matches the width of column 2 */
-    min-height: 150px;           /* Minimum height, can grow based on content */
+/* Card Row 2 Col 1 - Evidence Panel */
+.card-row2-col1 {
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
-    border: none;   /* Border around the entire card */
-    overflow: visible;           /* Allow content to be visible */
+    padding: 20px;
+    border: none;
+    min-height: 200px;
+    overflow-y: auto;
     transition: var(--transition-smooth);
-    animation: slideInFromBottom 0.6s ease-out 0.4s both;
+}
+
+.card-row2-col1:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Card Row 2 Col 2 - SHAP Visualizations */
+.card-row2-col2-viz {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: var(--card-shadow);
+    border-radius: 20px;
+    padding: 20px;
+    border: none;
+    min-height: 200px;
+    overflow-y: auto;
+    transition: var(--transition-smooth);
+}
+
+.card-row2-col2-viz:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
 }
 
 .card-row2-col2:hover {
     transform: translateY(-3px);
     box-shadow: var(--card-shadow-hover);
+}
+
+.card-row2-col2 .title {
+    color: #2c3e50;
+    font-size: 20px;
+    margin: 0 0 20px 0;
+    font-weight: bold;
+}
+
+.diagnosis-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 10px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid transparent;
+}
+
+.radio-option:hover {
+    background: rgba(0, 123, 255, 0.1);
+    border-color: rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+}
+
+.radio-label {
+    font-weight: 500;
+    color: #333;
+    font-size: 16px;
 }
 
 @keyframes slideInFromBottom {

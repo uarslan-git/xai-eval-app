@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html lang="       <!-- COL 1 --> 
+        <div class="main-row1">
+            <!-- COL 1-->meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>xai.ui/latest</title>
     <link rel="icon" href="data:image/x-icon;,">
@@ -48,12 +48,6 @@
                 <div class="title" id="patient-id-location2"></div>
                 <!-- Second Row: Image -->
                 <img id="patient-x-ray-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-                    <p><b>Suggested Diagnosis: </b><span id="suggested-diag-location2" class="unhealthy"></span></p>
-                    <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
-                </div>
             </div>
 
             <!-- COL 3 --> 
@@ -62,10 +56,6 @@
                 <div id="concept-card-1-title" class="title"></div>
                 <!-- Second Row: Image -->
                 <img id="concept-card-1-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b id="concept-card-1-caption"></b></p>
-                </div>
             </div>
  
 
@@ -75,10 +65,6 @@
                 <div id="concept-card-2-title" class="title"></div>
                 <!-- Second Row: Image -->
                 <img id="concept-card-2-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b id="concept-card-2-caption"></b></p>
-                </div>
             </div>
  
 
@@ -88,22 +74,11 @@
                 <div id="concept-card-3-title" class="title"></div>
                 <!-- Second Row: Image -->
                 <img id="concept-card-3-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b id="concept-card-3-caption"></b></p>
-                </div>
             </div>
  
         </div>
 
         <div class="main-row2">
-		    <div class="card-row2-col1">
-                    <h3 class="title">Concept-Based Explanations:</h3>
-                    <p class="text">
-                    Concept-based explanations help explain a diagnosis by identifying key features in the Blocky X-ray that influenced the decision. These explanations highlight specific areas in the X-ray that correspond to specific concept being shown, making it easier to understand what aspects of the image contributed to the diagnosis.
-                    </p>
-		    </div><!-- <div class="card-row2-col1">  -->
-
 		    <div class="card-row2-col2"> 
                 <div class="user-diagnosis">
                     <div class="title">Your Diagnosis</div><!-- Text above the radio buttons -->
@@ -119,6 +94,22 @@
 		</div> 	<!-- <div class="card-row2-col2"> -->
 	</div> 		<!-- <div class="main-row2"> --> 
 
+        <!-- OCDegen Biomarkers Row (moved from row 1) -->
+        <div class="main-row4">
+            <div class="card-row4-col1">
+                <h3 class="title">OCDegen Biomarkers</h3>
+                <ul class="biomarkers-list">
+                    <li>Strong Spine Bend</li>
+                    <li>Strong Bone Variation</li>
+                    <li>Tucked Head</li>
+                    <li>Main Bones Mutation</li>
+                </ul>
+                <h3 class="card-warning">Warning:</h3>
+                <p class="card-warning-text">
+                OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and highly invasive. Please verify all diagnoses before making your final decision. Furthermore, incorrect responses negatively affect your performance bonus.
+                </p>
+            </div>
+        </div> 		<!-- <div class="main-row4"> -->
 
     </main>
     <footer>

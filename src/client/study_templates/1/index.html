@@ -26,64 +26,18 @@
         </div>
     </header>
     <main>
-       <!-- COL 1 --> 
+        <!-- Row 1: X-ray Image Only (no captions) -->
         <div class="main-row1">
-            <!-- Card for OCDegen Biomarkers in Column 2 of main-row1 -->
             <div class="card-row1-col1">
-                <h3 class="title">OCDegen Biomarkers</h3>
-                <ul class="biomarkers-list">
-                    <li>Strong Spine Bend</li>
-                    <li>Strong Bone Variation</li>
-                    <li>Tucked Head</li>
-                    <li>Main Bones Mutation</li>
-                </ul>
-                <h3 class="card-warning">Warning:</h3>
-                <p class="card-warning-text">
-                OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and highly invasive. Please verify all diagnoses before making your final decision. Furthermore, incorrect responses negatively affect your performance bonus.
-                </p>
-            </div>
-            <!-- COL 2-->
-            <div class="card-row1-col2-3-4-5">
-                <!-- First Row: Patient ID -->
                 <div class="title" id="patient-id-location2"></div>
-                <!-- Second Row: Image -->
                 <img id="patient-x-ray-image" src="" alt="Patient Image" class="image">
-                <!-- Third Row: Text Info -->
-                <div class="caption">
-                    <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-                    <p><b>Suggested Diagnosis: </b><span id="suggested-diag-location2" class="unhealthy"></span></p>
-                    <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
-                </div>
             </div>
         </div>
 
+        <!-- Row 2: Interactive Features (Evidence & Visualizations) -->
         <div class="main-row2">
-		    <div class="card-row2-col1">
-                    <h3 class="title">Concept-Based Explanations:</h3>
-                    <p class="text">
-                    Concept-based explanations help explain a diagnosis by identifying key features in the Blocky X-ray that influenced the decision. These explanations highlight specific areas in the X-ray that correspond to specific concept being shown, making it easier to understand what aspects of the image contributed to the diagnosis.
-                    </p>
-		    </div><!-- <div class="card-row2-col1">  -->
-
-		    <div class="card-row2-col2"> 
-                <div class="user-diagnosis">
-                    <div class="title">Your Diagnosis</div><!-- Text above the radio buttons -->
-                    <div class="rectangle">
-                        <label class="healthy-label">
-                            <input id="radio-healthy" type="radio" name="health" value="healthy" /> Healthy
-                        </label>
-                        <label class="unhealthy-label">
-                            <input id="radio-unhealthy" type="radio" name="health" value="unhealthy" /> OCDegen
-                        </label>
-                    </div>
-                </div>
-		</div> 	<!-- <div class="card-row2-col2"> -->
-	</div> 		<!-- <div class="main-row2"> -->
-
-        <!-- New Interactive Features Row -->
-        <div class="main-row3">
             <!-- Evidence Panel -->
-            <div class="card-row3-col1">
+            <div class="card-row2-col1">
                 <h3 class="title">Diagnostic Evidence</h3>
                 <div class="diagnosis-selector">
                     <label for="evidence-diagnosis">View evidence for:</label>
@@ -93,6 +47,15 @@
                         <option value="unhealthy">OCDegen</option>
                     </select>
                     <button id="fetch-evidence-btn">Get Evidence</button>
+                </div>
+                
+                <div class="evidence-filter" style="display: none;">
+                    <label for="evidence-type-filter">Show evidence:</label>
+                    <select id="evidence-type-filter">
+                        <option value="all">All Evidence</option>
+                        <option value="for">Evidence For Only</option>
+                        <option value="against">Evidence Against Only</option>
+                    </select>
                 </div>
                 
                 <div id="evidence-container" class="evidence-container" style="display: none;">
@@ -109,7 +72,7 @@
             </div>
 
             <!-- SHAP Visualizations Panel -->
-            <div class="card-row3-col2">
+            <div class="card-row2-col2-viz">
                 <h3 class="title">Model Explanations</h3>
                 <div class="visualizations-container">
                     <div class="waterfall-section">
@@ -130,7 +93,53 @@
                     </div>
                 </div>
             </div>
-        </div> 		<!-- <div class="main-row3"> -->
+        </div> 		<!-- <div class="main-row2"> -->
+
+        <!-- Row 3: OCDegen Biomarkers -->
+        <div class="main-row3">
+            <div class="card-row3-col1">
+                <h3 class="title">OCDegen Biomarkers</h3>
+                <ul class="biomarkers-list">
+                    <li>Strong Spine Bend</li>
+                    <li>Strong Bone Variation</li>
+                    <li>Tucked Head</li>
+                    <li>Main Bones Mutation</li>
+                </ul>
+                <h3 class="card-warning">Warning:</h3>
+                <p class="card-warning-text">
+                    OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and highly invasive. Please verify all diagnoses before making your final decision. Furthermore, incorrect responses negatively affect your performance bonus.
+                </p>
+            </div>
+        </div>
+
+        <!-- Row 4: Final Diagnosis Display -->
+        <div class="main-row4">
+            <div class="card-row4-col1-diag">
+                <h3 class="title">Diagnosis Information</h3>
+                <div class="diagnosis-info">
+                    <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
+                    <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span></p>
+                    <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 5: User Diagnosis Selection (at the very bottom) -->
+        <div class="main-row5">
+            <div class="card-row5-col1-diagnosis">
+                <h3 class="title">Your Diagnosis</h3>
+                <div class="diagnosis-options">
+                    <label class="radio-option">
+                        <input id="radio-healthy" type="radio" name="health" value="healthy">
+                        <span class="radio-label">Healthy</span>
+                    </label>
+                    <label class="radio-option">
+                        <input id="radio-unhealthy" type="radio" name="health" value="unhealthy">
+                        <span class="radio-label">OCDegen</span>
+                    </label>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal for viewing visualizations -->
         <div id="visualization-modal" class="modal" style="display: none;">
