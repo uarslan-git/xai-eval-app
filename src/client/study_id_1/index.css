@@ -108,40 +108,7 @@ header > h1{
     margin-top:8px;
 }
 
-.header-info {
-    position: absolute;
-    top: 12px;
-    right: 60px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 15px;
-    box-shadow: var(--card-shadow);
-    transition: var(--transition-smooth);
-    animation: slideInFromRight 0.6s ease-out 0.2s both;
-}
 
-.header-info:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-@keyframes slideInFromRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-.header-info table {
-    border-collapse: collapse;
-    border: 1px solid #ccc;  /* Border for the entire table */
-}
-
-.header-info td {
-    padding: 0px 2px;
-    text-align: left;
-    border: 1px solid #ccc;  /* Border for individual cells */
-}
 
 .unhealthy {
     color: var(--orange);  /* Red color for Unhealthy */
@@ -156,12 +123,11 @@ header > h1{
 main {
     position: relative;
     display: grid;
-    /* Five rows layout: auto-sizing based on content */
+    /* Four rows layout: auto-sizing based on content */
     grid-template-rows: min-content   /* Row 1: X-ray image */
                        min-content   /* Row 2: Interactive features (evidence & visualizations) */
                        min-content   /* Row 3: OCDegen biomarkers */
-                       min-content   /* Row 4: Final diagnosis info */
-                       min-content;  /* Row 5: User diagnosis selection (very bottom) */
+                       min-content;  /* Row 4: User diagnosis selection (very bottom) */
     column-gap: 15px;
     row-gap: 15px;
     padding: 1rem;
@@ -193,11 +159,10 @@ main {
     display: grid;
     background: none;
     border-radius: 8px;
-    grid-template-columns: 1fr 1fr;  /* Two equal columns for evidence and visualizations */
-    min-height: calc(var(--body-height) * 0.2);
+    grid-template-columns: 1fr;  /* Single column for combined evidence and visualizations */
+    min-height: calc(var(--body-height) * 0.3);  /* Increased height to accommodate merged content */
     border: var(--border2);
     overflow: visible;
-    column-gap: 15px;
     padding: 0;
     align-items: start;
     animation: slideInFromBottom 0.8s ease-out 0.4s both;
@@ -911,8 +876,8 @@ footer .progress-text {
     font-weight: bold;
 }
 
-/* Card Row 5 Col 1 - User Diagnosis Selection (bottom) */
-.card-row5-col1-diagnosis {
+/* Card Row 4 Col 1 - User Diagnosis Selection (bottom) */
+.card-row4-col1-diagnosis {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -930,12 +895,12 @@ footer .progress-text {
     text-align: center;
 }
 
-.card-row5-col1-diagnosis:hover {
+.card-row4-col1-diagnosis:hover {
     transform: translateY(-3px);
     box-shadow: var(--card-shadow-hover);
 }
 
-.card-row5-col1-diagnosis .title {
+.card-row4-col1-diagnosis .title {
     color: #2c3e50;
     font-size: 20px;
     margin: 0 0 20px 0;
@@ -971,17 +936,17 @@ footer .progress-text {
     from { transform: translateX(-50px); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+/* Card Row 2 Col 1 - Combined Evidence & Model Explanations Panel */
 .card-row2-col1 {
-    display: grid;
-    gap: 1px;                    /* 5px gap between elements */
-    width: 97.5%;                 /* Ensure card width matches the width of column 2 */
-    min-height: 150px;           /* Minimum height, can grow based on content */
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
     box-shadow: var(--card-shadow);
     border-radius: 20px;
-    overflow: visible;           /* Allow content to be visible */
-    border: none;   /* Border around the entire card */
-    margin-left:10px;
+    padding: 20px;
+    border: none;
+    min-height: 300px;           /* Increased height for merged content */
+    overflow-y: auto;
     transition: var(--transition-smooth);
     animation: slideInFromBottom 0.6s ease-out 0.2s both;
 }
@@ -991,55 +956,7 @@ footer .progress-text {
     box-shadow: var(--card-shadow-hover);
 }
 
-/* Card Row 2 Col 1 - Evidence Panel */
-.card-row2-col1 {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
-    padding: 20px;
-    border: none;
-    min-height: 200px;
-    overflow-y: auto;
-    transition: var(--transition-smooth);
-}
 
-.card-row2-col1:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-/* Card Row 2 Col 2 - SHAP Visualizations */
-.card-row2-col2-viz {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: var(--card-shadow);
-    border-radius: 20px;
-    padding: 20px;
-    border: none;
-    min-height: 200px;
-    overflow-y: auto;
-    transition: var(--transition-smooth);
-}
-
-.card-row2-col2-viz:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-.card-row2-col2:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--card-shadow-hover);
-}
-
-.card-row2-col2 .title {
-    color: #2c3e50;
-    font-size: 20px;
-    margin: 0 0 20px 0;
-    font-weight: bold;
-}
 
 .diagnosis-options {
     display: flex;
@@ -1055,14 +972,17 @@ footer .progress-text {
     padding: 12px 20px;
     border-radius: 12px;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.7);
-    border: 2px solid transparent;
+    background: linear-gradient(145deg, #007bff 0%, #0056b3 100%);
+    border: 2px solid rgba(0, 123, 255, 0.3);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
 .radio-option:hover {
-    background: rgba(0, 123, 255, 0.1);
-    border-color: rgba(0, 123, 255, 0.3);
+    background: linear-gradient(145deg, #0069d9 0%, #004085 100%);
+    border-color: rgba(0, 123, 255, 0.6);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
 .radio-option input[type="radio"] {
@@ -1073,7 +993,7 @@ footer .progress-text {
 
 .radio-label {
     font-weight: 500;
-    color: #333;
+    color: white;
     font-size: 16px;
 }
 

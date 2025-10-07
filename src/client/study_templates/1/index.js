@@ -10,12 +10,7 @@ let input = null;
 const button_next = document.getElementById("button-next");
 const button_prev = document.getElementById("button-prev");
 const radio_buttons = document.getElementsByName("health");
-const patient_id1 = document.getElementById("patient-id-location1");
 const patient_id2 = document.getElementById("patient-id-location2");
-const x_ray_location = document.getElementById("x-ray-location");
-const suggested_diag1 = document.getElementById("suggested-diag-location1");
-const suggested_diag2 = document.getElementById("suggested-diag-location2");
-const true_diag   = document.getElementById("true-diag");
 const x_ray_image = document.getElementById("patient-x-ray-image");
 
 let diagnosis = null;
@@ -96,7 +91,6 @@ function set_progress(current_page_nr, total_page_count) {
 
 function set_patient_id(id)
 {
-    patient_id1.textContent = id.toString();
     patient_id2.textContent = "Patient ID: " + id.toString();
     
     // Notify interactive features of the current patient
@@ -326,37 +320,20 @@ async function prev_button_action()
 
 function set_suggested_diag(value)
 {
-    suggested_diag1.textContent = value;
-    suggested_diag2.textContent = value;
-    if(value == "OCDegen"){
-        suggested_diag1.className = "";
-        suggested_diag2.className = "";
-        suggested_diag1.className = "unhealthy"
-        suggested_diag2.className = "unhealthy"
-    }else{
-        suggested_diag1.className = "";
-        suggested_diag2.className = "";
-        suggested_diag1.className = "healthy"
-        suggested_diag2.className = "healthy"
-    }
+    // Suggested diagnosis display was removed from the UI
+    // This function is kept for compatibility but does nothing
 }
 
 function set_x_ray_location(value)
 {
-    x_ray_location.textContent = value;
+    // X-ray location display was removed from the UI
+    // This function is kept for compatibility but does nothing
 }
 
 function set_true_diag(value)
 {
-    true_diag.textContent = value;
-    if(value == "OCDegen"){
-        true_diag.className = ""
-        true_diag.className = "unhealthy"
-    }else{
-        true_diag.className = ""
-        true_diag.className = "healthy"
-    }
-
+    // True diagnosis display was removed from the UI
+    // This function is kept for compatibility but does nothing
 }
 
 //get total pagecount for the study
@@ -455,11 +432,9 @@ class InteractiveFeatures {
         
         // Evidence fetching
         const fetchEvidenceBtn = document.getElementById('fetch-evidence-btn');
-        const diagnosisSelect = document.getElementById('evidence-diagnosis');
         
         console.log('InteractiveFeatures: Found elements', {
-            fetchEvidenceBtn: !!fetchEvidenceBtn,
-            diagnosisSelect: !!diagnosisSelect
+            fetchEvidenceBtn: !!fetchEvidenceBtn
         });
         
         if (fetchEvidenceBtn) {
@@ -472,18 +447,7 @@ class InteractiveFeatures {
             console.error('InteractiveFeatures: fetch-evidence-btn not found!');
         }
 
-        if (diagnosisSelect) {
-            diagnosisSelect.addEventListener('change', () => {
-                const evidenceContainer = document.getElementById('evidence-container');
-                const evidenceFilter = document.querySelector('.evidence-filter');
-                if (evidenceContainer) {
-                    evidenceContainer.style.display = 'none';
-                }
-                if (evidenceFilter) {
-                    evidenceFilter.style.display = 'none';
-                }
-            });
-        }
+        // Remove diagnosis select functionality since it's no longer needed
 
         // Evidence type filter
         const evidenceTypeFilter = document.getElementById('evidence-type-filter');
@@ -609,29 +573,22 @@ class InteractiveFeatures {
     async fetchEvidence() {
         console.log('InteractiveFeatures: fetchEvidence called');
         
-        const diagnosisSelect = document.getElementById('evidence-diagnosis');
         const evidenceContainer = document.getElementById('evidence-container');
         const fetchBtn = document.getElementById('fetch-evidence-btn');
 
         console.log('InteractiveFeatures: Elements check', {
-            diagnosisSelect: !!diagnosisSelect,
             evidenceContainer: !!evidenceContainer,
             fetchBtn: !!fetchBtn
         });
 
-        if (!diagnosisSelect || !evidenceContainer || !fetchBtn) {
+        if (!evidenceContainer || !fetchBtn) {
             console.error('InteractiveFeatures: Missing required elements');
             return;
         }
 
-        const diagnosis = diagnosisSelect.value;
-        console.log('InteractiveFeatures: Selected diagnosis:', diagnosis);
-        
-        if (!diagnosis) {
-            console.log('InteractiveFeatures: No diagnosis selected');
-            alert('Please select a diagnosis first');
-            return;
-        }
+        // Default to 'unhealthy' diagnosis for evidence fetching
+        const diagnosis = 'unhealthy';
+        console.log('InteractiveFeatures: Using default diagnosis:', diagnosis);
 
         // Show loading state
         fetchBtn.textContent = 'Loading...';

@@ -12,18 +12,6 @@
     <div class="fixed-page-dimension">
     <header>
         <h1>BLOCKIES EVALUATION</h1>
-        <div class="header-info">
-        <table>
-           <tr>
-                <td>Patient ID:</td>
-                <td id="patient-id-location1"></td>
-            </tr>
-            <tr>
-                <td>Suggested Diagnosis:</td>
-                <td id="suggested-diag-location1" class="unhealthy"></td>
-            </tr>
-        </table>
-        </div>
     </header>
     <main>
         <!-- Row 1: X-ray Image Only (no captions) -->
@@ -34,18 +22,14 @@
             </div>
         </div>
 
-        <!-- Row 2: Interactive Features (Evidence & Visualizations) -->
+        <!-- Row 2: Interactive Features (Evidence & Model Explanations) -->
         <div class="main-row2">
-            <!-- Evidence Panel -->
+            <!-- Combined Evidence and Visualizations Panel -->
             <div class="card-row2-col1">
-                <h3 class="title">Diagnostic Evidence</h3>
+                <h3 class="title">Diagnostic Evidence & Model Explanations</h3>
+                
+                <!-- Evidence Section -->
                 <div class="diagnosis-selector">
-                    <label for="evidence-diagnosis">View evidence for:</label>
-                    <select id="evidence-diagnosis">
-                        <option value="">Select diagnosis...</option>
-                        <option value="healthy">Healthy</option>
-                        <option value="unhealthy">OCDegen</option>
-                    </select>
                     <button id="fetch-evidence-btn">Get Evidence</button>
                 </div>
                 
@@ -69,26 +53,27 @@
                         <div id="evidence-against-list" class="evidence-list"></div>
                     </div>
                 </div>
-            </div>
 
-            <!-- SHAP Visualizations Panel -->
-            <div class="card-row2-col2-viz">
-                <h3 class="title">Model Explanations</h3>
-                <div class="visualizations-container">
-                    <div class="waterfall-section">
-                        <h4 class="viz-title">Waterfall Plot</h4>
-                        <div id="waterfall-container" class="viz-container">
-                            <button id="view-waterfall-btn" class="viz-btn">View Waterfall Plot</button>
-                        </div>
-                    </div>
+                <!-- Integrated Model Explanations Section -->
+                <div class="model-explanations-section" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(79, 172, 254, 0.2);">
+                    <h4 class="title" style="font-size: 18px; color: #4facfe; margin-bottom: 20px;">Model Explanations</h4>
                     
-                    <div class="heatmaps-section">
-                        <h4 class="viz-title">Model Heatmaps</h4>
-                        <div id="heatmaps-container" class="heatmaps-grid">
-                            <button class="heatmap-btn" data-heatmap="1">Heatmap 1</button>
-                            <button class="heatmap-btn" data-heatmap="2">Heatmap 2</button>
-                            <button class="heatmap-btn" data-heatmap="3">Heatmap 3</button>
-                            <button class="heatmap-btn" data-heatmap="4">Heatmap 4</button>
+                    <div class="visualizations-container">
+                        <div class="waterfall-section" style="margin-bottom: 20px;">
+                            <h5 class="viz-title" style="font-size: 14px; color: #666; margin-bottom: 10px;">Waterfall Plot</h5>
+                            <div id="waterfall-container" class="viz-container">
+                                <button id="view-waterfall-btn" class="viz-btn">View Waterfall Plot</button>
+                            </div>
+                        </div>
+                        
+                        <div class="heatmaps-section">
+                            <h5 class="viz-title" style="font-size: 14px; color: #666; margin-bottom: 10px;">Model Heatmaps</h5>
+                            <div id="heatmaps-container" class="heatmaps-grid">
+                                <button class="heatmap-btn" data-heatmap="1">Heatmap 1</button>
+                                <button class="heatmap-btn" data-heatmap="2">Heatmap 2</button>
+                                <button class="heatmap-btn" data-heatmap="3">Heatmap 3</button>
+                                <button class="heatmap-btn" data-heatmap="4">Heatmap 4</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -112,21 +97,9 @@
             </div>
         </div>
 
-        <!-- Row 4: Final Diagnosis Display -->
+        <!-- Row 4: User Diagnosis Selection (at the very bottom) -->
         <div class="main-row4">
-            <div class="card-row4-col1-diag">
-                <h3 class="title">Diagnosis Information</h3>
-                <div class="diagnosis-info">
-                    <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-                    <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span></p>
-                    <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Row 5: User Diagnosis Selection (at the very bottom) -->
-        <div class="main-row5">
-            <div class="card-row5-col1-diagnosis">
+            <div class="card-row4-col1-diagnosis">
                 <h3 class="title">Your Diagnosis</h3>
                 <div class="diagnosis-options">
                     <label class="radio-option">
