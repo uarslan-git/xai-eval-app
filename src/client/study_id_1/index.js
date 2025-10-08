@@ -749,58 +749,137 @@ class InteractiveFeatures {
         return div;
     }
 
-    triggerRelatedVisualization(evidenceItem) {
-        console.log('Triggering individual SHAP visualization for evidence:', evidenceItem);
-        
-        // Create a visual feedback in the Model Explanations section
-        this.highlightModelExplanations();
-        
-        // Create a unique visualization ID for each evidence concept
-        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
-        
-        // Each evidence item gets its own dedicated SHAP visualization
+    async triggerRelatedVisualization(evidenceItem) {
+        // Simulate API request to backend for visualizations
+        // In real implementation, replace with fetch('/api/visualizations', ...)
+        const mockApiResponse = await this.mockFetchVisualizations(evidenceItem);
+
+        // Render overlay/modal with correct number of visualizations
+        this.renderEvidenceVisualizationsOverlay(evidenceItem, mockApiResponse);
+    }
+
+    // Mock backend API for visualizations
+    async mockFetchVisualizations(evidenceItem) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Decide number of heatmaps/waterfall plots based on evidence type
         const concept = evidenceItem.concept.toLowerCase();
-        
-        // Neuroimaging-based evidence gets heatmaps (spatial features)
-        if (concept.includes('cortical thickness') || concept.includes('cortical')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'cortical_thickness', 1);
-        } else if (concept.includes('white matter') || concept.includes('connectivity')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'white_matter', 2);
-        } else if (concept.includes('hippocampal') || concept.includes('hippocampus')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'hippocampal_volume', 3);
-        } else if (concept.includes('amygdala')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'amygdala_volume', 4);
-        } else if (concept.includes('ventricular') || concept.includes('ventricle')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'ventricular_volume', 1);
-        } else if (concept.includes('lesion') || concept.includes('abnormality')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'lesion_pattern', 2);
-        
-        // Clinical/demographic features get waterfall plots (feature importance)
-        } else if (concept.includes('age') || concept.includes('demographic')) {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'demographic_age');
-        } else if (concept.includes('cognitive') || concept.includes('mmse') || concept.includes('moca')) {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'cognitive_score');
-        } else if (concept.includes('biomarker') || concept.includes('csf') || concept.includes('plasma')) {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'biomarker_level');
-        } else if (concept.includes('genetic') || concept.includes('apoe')) {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'genetic_factor');
-        } else if (concept.includes('clinical') || concept.includes('symptom')) {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'clinical_symptom');
-        
-        // Catch-all cases for structural features
-        } else if (concept.includes('spine') || concept.includes('bone') || concept.includes('structure')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'structural_feature', 3);
-        } else if (concept.includes('density') || concept.includes('intensity') || concept.includes('pattern')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'intensity_pattern', 4);
-        } else if (concept.includes('shape') || concept.includes('contour') || concept.includes('outline')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'shape_feature', 1);
-        } else if (concept.includes('texture') || concept.includes('surface') || concept.includes('detail')) {
-            this.viewIndividualSHAPHeatmap(evidenceItem, 'texture_feature', 2);
-        
-        // Default case - use waterfall for general feature importance
-        } else {
-            this.viewIndividualSHAPWaterfall(evidenceItem, 'general_feature');
+        let numHeatmaps = 0;
+        let numWaterfalls = 0;
+        if (concept.includes('cortical') || concept.includes('white matter') || concept.includes('hippocampal') || concept.includes('amygdala') || concept.includes('ventricular') || concept.includes('lesion') || concept.includes('spine') || concept.includes('bone') || concept.includes('structure') || concept.includes('density') || concept.includes('intensity') || concept.includes('pattern') || concept.includes('shape') || concept.includes('contour') || concept.includes('outline') || concept.includes('texture') || concept.includes('surface') || concept.includes('detail')) {
+            numHeatmaps = 2 + Math.floor(Math.random() * 2); // 2-3 heatmaps
         }
+        if (concept.includes('age') || concept.includes('demographic') || concept.includes('cognitive') || concept.includes('mmse') || concept.includes('moca') || concept.includes('biomarker') || concept.includes('csf') || concept.includes('plasma') || concept.includes('genetic') || concept.includes('apoe') || concept.includes('clinical') || concept.includes('symptom')) {
+            numWaterfalls = 1 + Math.floor(Math.random() * 2); // 1-2 waterfall plots
+        }
+        // Default: at least one visualization
+        if (numHeatmaps === 0 && numWaterfalls === 0) {
+            numWaterfalls = 1;
+        }
+        return {
+            heatmaps: Array.from({length: numHeatmaps}, (_, i) => ({
+                id: i+1, 
+                url: null, 
+                isMock: true,
+                name: `SHAP Heatmap ${i+1} for ${evidenceItem.concept}`,
+                description: `Spatial attention map showing regions contributing to ${evidenceItem.concept}`
+            })),
+            waterfalls: Array.from({length: numWaterfalls}, (_, i) => ({
+                id: i+1, 
+                url: null, 
+                isMock: true,
+                name: `SHAP Waterfall ${i+1} for ${evidenceItem.concept}`,
+                description: `Feature importance breakdown for ${evidenceItem.concept}`
+            }))
+        };
+    }
+
+    // Render overlay/modal with correct number of visualizations
+    renderEvidenceVisualizationsOverlay(evidenceItem, visualizations) {
+        const modal = document.getElementById('visualization-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        if (!modal || !modalTitle || !modalBody) return;
+
+        modalTitle.textContent = `Visualizations for: ${evidenceItem.concept}`;
+        
+        const evidenceTypeColor = evidenceItem.importance > 0 ? '#28a745' : '#dc3545';
+        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
+        
+        let html = `
+            <div style="text-align: center;">
+                <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                        <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
+                        <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
+                    <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
+                </div>
+        `;
+        
+        if (visualizations.waterfalls.length > 0) {
+            html += `
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #007bff; margin-bottom: 15px;">Waterfall Plots (${visualizations.waterfalls.length})</h4>
+                    <div style="display: grid; gap: 10px;">
+            `;
+            visualizations.waterfalls.forEach((w, idx) => {
+                html += `
+                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;" 
+                         onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"
+                         onclick="alert('Waterfall Plot ${idx+1} - Shows feature contribution breakdown for: ${evidenceItem.concept}')">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 30px;">📊</span>
+                            <div>
+                                <div style="font-weight: bold; font-size: 16px;">Waterfall Plot ${idx+1}</div>
+                                <div style="font-size: 12px; opacity: 0.8;">Click to view feature contributions</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+        
+        if (visualizations.heatmaps.length > 0) {
+            html += `
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: #ee5a24; margin-bottom: 15px;">Heatmaps (${visualizations.heatmaps.length})</h4>
+                    <div style="display: grid; gap: 10px;">
+            `;
+            visualizations.heatmaps.forEach((h, idx) => {
+                html += `
+                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 20px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;" 
+                         onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"
+                         onclick="alert('Heatmap ${idx+1} - Shows spatial attention regions for: ${evidenceItem.concept}')">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 30px;">🔥</span>
+                            <div>
+                                <div style="font-weight: bold; font-size: 16px;">Heatmap ${idx+1}</div>
+                                <div style="font-size: 12px; opacity: 0.8;">Click to view attention regions</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+        }
+        
+        html += `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <p style="margin: 0; font-size: 14px; color: #666;">
+                        <strong>API Request:</strong> GET /api/visualizations?evidence_id=${this.generateEvidenceVisualizationId(evidenceItem)}&patient_id=${this.currentPatientId || 'unknown'}
+                    </p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #888;">
+                        Mock response: ${visualizations.heatmaps.length} heatmaps, ${visualizations.waterfalls.length} waterfall plots
+                    </p>
+                </div>
+            </div>
+        `;
+        modalBody.innerHTML = html;
+        modal.style.display = 'block';
     }
 
     generateEvidenceVisualizationId(evidenceItem) {
