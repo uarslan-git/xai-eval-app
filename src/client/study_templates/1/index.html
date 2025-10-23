@@ -1,138 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>xai.ui/latest</title>
-  <link rel="icon" href="data:image/x-icon;,">
-  <link rel="stylesheet" href="index.css" />
-  <script src="index.js" defer></script>
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>xai.ui/latest</title>
+    <link rel="icon" href="data:image/x-icon;," />
+    <link rel="stylesheet" href="index.css" />
+    <script src="index.js" defer></script>
+  </head>
 
-<body>
-  <div class="fixed-page-dimension">
-    <!--HEADER-->
-    <header>
-      <h1>Blockies OCDegen Diagnosis Support</h1>
+  <body>
+    <div class="fixed-page-dimension">
+      <!--HEADER-->
+      <header>
+        <h1>Blockies OCDegen Diagnosis Support</h1>
 
-      <div class="progress-bar-container">
-        <div class="progress-bar"></div>
-        <div class="progress-text" id="progress-bar-text">Diagnosis 5/10</div>
-      </div>
-
-      <!-- hidden placeholders the JS still updates -->
-      <span id="patient-id-location1" style="display:none"></span>
-      <span id="suggested-diag-location1" style="display:none"></span>
-    </header>
-
-    <!-- MAIN -->
-    <main>
-      <!-- ROW 1 :  Patient image + Concept/Heatmap card -->
-      <div class="main-row1">
-
-        <!-- Patient image card -->
-        <div class="card-row1-col2-3-4-5" id="patient-card">
-          <div class="title" id="patient-id-location2"></div>
-
-          <img id="patient-x-ray-image"
-               class="image"
-               src=""
-               alt="Patient Image" />
-
-          <!-- Caption with patient details -->
-          <div class="caption">
-            <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
-            <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span></p>
-            <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
-          </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar"></div>
+          <div class="progress-text" id="progress-bar-text">Diagnosis 5/10</div>
         </div>
 
-        <!-- Concept/Heatmap card (will update when evidence is clicked) -->
-        <div class="card-row1-col2-3-4-5" id="heatmap-card">
-          <div id="heatmap-card-title" class="title">Select Evidence to View Heatmap</div>
-          <img id="heatmap-card-image" src="" alt="Heatmap" class="image" style="display: none;">
-          <div class="caption">
-            <p><b>Concept:</b> <span id="heatmap-card-concept"></span></p>
-            <p><b>Importance:</b> <span id="heatmap-card-importance"></span></p>
-          </div>
-        </div>
+        <!-- hidden placeholders the JS still updates -->
+        <span id="patient-id-location1" style="display: none"></span>
+        <span id="suggested-diag-location1" style="display: none"></span>
+      </header>
 
-      </div> <!-- /main-row1 -->
+      <!-- MAIN -->
+      <main>
+        <!-- ROW 1 :  Patient image + Concept/Heatmap card -->
+        <div class="main-row1">
+          <!-- Patient image card -->
+          <div class="card-row1-col2-3-4-5" id="patient-card">
+            <div class="title" id="patient-id-location2"></div>
 
+            <img
+              id="patient-x-ray-image"
+              class="image"
+              src=""
+              alt="Patient Image"
+            />
 
-      <!-- ROW 2 : Diagnosis + Evidence side by side -->
-      <div class="main-row2" id="diagnosis-evidence-row">
-      
-        <!-- Diagnosis Card -->
-        <div class="card-row2-col2">
-          <h3 class="title">Blocky Diagnosis</h3>
-      
-          <div class="card-content">
-            <!-- Left: Present biomarkers -->
-            <div class="left-content">
-              <p><b>Present Biomarkers:</b> <span id="X_RAY_Trait"></span></p>
+            <!-- Caption with patient details -->
+            <div class="caption">
+              <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
+              <p>
+                <b>Suggested Diagnosis:</b>
+                <span id="suggested-diag-location2" class="unhealthy"></span>
+              </p>
+              <p>
+                <b>True Diagnosis:</b>
+                <span id="true-diag" class="healthy"></span>
+              </p>
             </div>
-      
-            <!-- Right: user radio selection -->
-            <div class="right-options">
-              <p><b>Your Diagnosis:</b></p>
-              <label class="healthy-label">
-                <input id="radio-healthy" type="radio" name="health" value="healthy" /> Healthy
-              </label>
-              <label class="mild-label">
-                <input id="radio-mild" type="radio" name="health" value="mild" /> Mild OCDegen
-              </label>
-              <label class="moderate-label">
-                <input id="radio-moderate" type="radio" name="health" value="moderate" /> Moderate OCDegen
-              </label>
-              <label class="severe-label">
-                <input id="radio-severe" type="radio" name="health" value="severe" /> Severe OCDegen
-              </label>
-              <label class="unhealthy-label">
-                <input id="radio-unhealthy" type="radio" name="health" value="unhealthy" /> Critical OCDegen
-              </label>
+          </div>
+
+          <!-- Concept/Heatmap card (will update when evidence is clicked) -->
+          <div class="card-row1-col2-3-4-5" id="heatmap-card">
+            <div id="heatmap-card-title" class="title">
+              Select Evidence to View Heatmap
+            </div>
+            <img
+              id="heatmap-card-image"
+              src=""
+              alt="Heatmap"
+              class="image"
+              style="display: none"
+            />
+            <div class="caption">
+              <p><b>Concept:</b> <span id="heatmap-card-concept"></span></p>
+              <p>
+                <b>Importance:</b> <span id="heatmap-card-importance"></span>
+              </p>
             </div>
           </div>
         </div>
+        <!-- /main-row1 -->
 
-        <!-- Evidence Panel -->
-        <div class="card-row3-col1" id="evidence-card" style="display: none;">
-          <h3 class="title">Diagnostic Evidence</h3>
-          
-          <div id="evidence-container" class="evidence-container">
-            <div class="evidence-section">
-              <h4 class="evidence-title evidence-for">Evidence For <span id="evidence-for-diagnosis"></span></h4>
-              <div id="evidence-for-list" class="evidence-list"></div>
+        <!-- ROW 2 : Diagnosis + Evidence side by side -->
+        <div class="main-row2" id="diagnosis-evidence-row">
+          <!-- Diagnosis Card -->
+          <div class="card-row2-col2">
+            <h3 class="title">Blocky Diagnosis</h3>
+
+            <div class="card-content">
+              <!-- Left: Present biomarkers -->
+              <div class="left-content">
+                <p><b>Present Biomarkers:</b> <span id="X_RAY_Trait"></span></p>
+              </div>
+
+              <!-- Right: user radio selection -->
+              <div class="right-options">
+                <p><b>Your Diagnosis:</b></p>
+                <label class="healthy-label">
+                  <input
+                    id="radio-healthy"
+                    type="radio"
+                    name="health"
+                    value="healthy"
+                  />
+                  Healthy
+                </label>
+                <label class="mild-label">
+                  <input
+                    id="radio-mild"
+                    type="radio"
+                    name="health"
+                    value="mild"
+                  />
+                  Mild OCDegen
+                </label>
+                <label class="moderate-label">
+                  <input
+                    id="radio-moderate"
+                    type="radio"
+                    name="health"
+                    value="moderate"
+                  />
+                  Moderate OCDegen
+                </label>
+                <label class="severe-label">
+                  <input
+                    id="radio-severe"
+                    type="radio"
+                    name="health"
+                    value="severe"
+                  />
+                  Severe OCDegen
+                </label>
+                <label class="unhealthy-label">
+                  <input
+                    id="radio-unhealthy"
+                    type="radio"
+                    name="health"
+                    value="unhealthy"
+                  />
+                  Critical OCDegen
+                </label>
+              </div>
             </div>
-            
-            <div class="evidence-section">
-              <h4 class="evidence-title evidence-against">Evidence Against <span id="evidence-against-diagnosis"></span></h4>
-              <div id="evidence-against-list" class="evidence-list"></div>
+          </div>
+
+          <!-- Evidence Panel -->
+          <div class="card-row3-col1" id="evidence-card" style="display: none">
+            <h3 class="title">Diagnostic Evidence</h3>
+
+            <div id="evidence-container" class="evidence-container">
+              <div class="evidence-section">
+                <h4 class="evidence-title evidence-for">
+                  Evidence For <span id="evidence-for-diagnosis"></span>
+                </h4>
+                <div id="evidence-for-list" class="evidence-list"></div>
+              </div>
+
+              <div class="evidence-section">
+                <h4 class="evidence-title evidence-against">
+                  Evidence Against <span id="evidence-against-diagnosis"></span>
+                </h4>
+                <div id="evidence-against-list" class="evidence-list"></div>
+              </div>
             </div>
           </div>
         </div>
-      
-      </div> <!-- <div class="main-row2"> -->
+        <!-- <div class="main-row2"> -->
 
-      <!-- Modal for viewing visualizations -->
-      <div id="visualization-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-          <span class="modal-close">&times;</span>
-          <div id="modal-title" class="modal-title"></div>
-          <div id="modal-body" class="modal-body"></div>
+        <!-- Modal for viewing visualizations -->
+        <div id="visualization-modal" class="modal" style="display: none">
+          <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div id="modal-title" class="modal-title"></div>
+            <div id="modal-body" class="modal-body"></div>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
 
-    <!--FOOTER -->
-    <footer>
-      <div class="nav-buttons">
-        <button id="button-prev">Previous</button>
-        <button id="button-next">Next</button>
-        <button id="button-submit" class="submit-bottom-right">Submit</button>
-      </div>
-    </footer>
-  </div>
-</body>
+      <!--FOOTER -->
+      <footer>
+        <div class="nav-buttons">
+          <button id="button-prev">Previous</button>
+          <button id="button-next">Next</button>
+          <button id="button-submit" class="submit-bottom-right">Submit</button>
+        </div>
+      </footer>
+    </div>
+  </body>
 </html>
-

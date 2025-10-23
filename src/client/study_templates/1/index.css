@@ -5,9 +5,9 @@
   /* 1920px  */
   --fixed-screen-height: 1000px;
   /* 1080px */
-  --app-width: calc(var(--fixed-screen-width) * (1 - 0.0));
+  --app-width: calc(var(--fixed-screen-width) * (1 - 0));
   /*reduce app-width */
-  --app-height: calc(var(--fixed-screen-height) * (1 - 0.0));
+  --app-height: calc(var(--fixed-screen-height) * (1 - 0));
   /*reduce app-height */
 
   --blue: #1e90ff;
@@ -42,7 +42,6 @@
   --grid-template-row2-columns: repeat(var(--grid-row2-ncolumns), 1fr);
   /* Use var() inside repeat() */
   /* --grid-template-row2-columns: calc(var(--app-width) * 0.6) calc(var(--app-width) * 0.39);  */
-
 
   /* Calculate the reduced values */
   --header-height: calc(var(--app-height) * 0.1);
@@ -85,7 +84,9 @@ body {
   /* Centers the content horizontally */
   width: 100%;
   /* Ensures it scales on smaller screens */
-  grid-template-rows: var(--header-height) var(--body-height) var(--footer-height);
+  grid-template-rows: var(--header-height) var(--body-height) var(
+      --footer-height
+    );
   grid-template-columns: auto;
 }
 
@@ -98,7 +99,7 @@ header {
   padding: 1rem;
 }
 
-header>h1 {
+header > h1 {
   align-items: center;
   justify-content: left;
   text-align: left;
@@ -119,11 +120,9 @@ header .progress-bar-container {
   /* Rounded corners for the container */
   overflow: hidden;
   /* Ensures text stays within the bar */
-
 }
 
 header .progress-bar {
-
   width: 50%;
   /* Set the progress here */
   height: 100%;
@@ -169,7 +168,8 @@ main {
   display: grid;
   /* 60% 38%; */
   /* Adjust the height of row1 and row2*/
-  grid-template-rows: calc(var(--body-height) * 0.48)
+  grid-template-rows:
+    calc(var(--body-height) * 0.48)
     /* row1: patient + concepts */
     calc(var(--body-height) * 0.28)
     /* row2: diagnosis */
@@ -209,8 +209,8 @@ main {
   display: grid;
   background: none;
   border-radius: 8px;
-  grid-template-columns: 1fr 1fr;
-  /* Two columns: diagnosis and evidence */
+  grid-template-columns: auto 1fr;
+  /* Diagnosis card fits content, evidence card takes remaining space */
   height: 100%;
   /* Use full available height */
   overflow: visible;
@@ -230,7 +230,7 @@ main {
   height: 100%;
   /* Use full available height */
   background: white;
-  box-shadow: 0 0px 8px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   grid-template-rows: 8% 68% 24%;
   /* Row heights adjusted: more space for caption, less for image */
@@ -281,12 +281,12 @@ main {
   margin: 8px 0;
 }
 
-.main-row1>.card-row1-col2-3-4-5:first-child.healthy {
+.main-row1 > .card-row1-col2-3-4-5:first-child.healthy {
   box-shadow: 0px 0px 18px rgba(var(--green-rgb), 0.4);
   /* soft blue shadow */
 }
 
-.main-row1>.card-row1-col2-3-4-5:first-child.unhealthy {
+.main-row1 > .card-row1-col2-3-4-5:first-child.unhealthy {
   box-shadow: 0px 0px 18px rgba(var(--orange-rgb), 0.4);
   /* soft blue shadow */
 }
@@ -342,8 +342,6 @@ main {
   color: white;
 }
 
-
-
 footer {
   position: relative;
   justify-content: center;
@@ -366,7 +364,6 @@ footer .nav-buttons {
   /* reference for Submit */
 }
 
-
 footer .nav-buttons button {
   /* background: var(--bg-blue); */
   color: white;
@@ -379,18 +376,17 @@ footer .nav-buttons button {
   font-size: large;
   font-weight: bold;
   background: linear-gradient(to top, var(--bg-blue), #4a6e9e);
-  box-shadow: 0 2px 5px rgba(1, 1, 1, .2);
+  box-shadow: 0 2px 5px rgba(1, 1, 1, 0.2);
   transition: box-shadow 0.2s, transform 0.2s;
 }
 
 footer .nav-buttons button:hover {
-  box-shadow: 0 4px 5px rgba(1, 1, 1, .25);
+  box-shadow: 0 4px 5px rgba(1, 1, 1, 0.25);
   transition: box-shadow 0.2s;
 }
 
-
 footer .nav-buttons button:active {
-  box-shadow: 0 2px 5px rgba(1, 1, 1, .20);
+  box-shadow: 0 2px 5px rgba(1, 1, 1, 0.2);
   transition: box-shadow 0.2s, transform 0.2s;
   background-color: 0.5s;
   background-color: #ccc;
@@ -481,8 +477,12 @@ button[disabled]:hover {
   display: grid;
   gap: 1px;
   /* 5px gap between elements */
-  width: 100%;
-  /* Ensure card width matches the width of column 2 */
+  width: auto;
+  /* Fit content width */
+  max-width: 450px;
+  /* Maximum width for diagnosis card */
+  min-width: 350px;
+  /* Minimum width to prevent squashing */
   height: 100%;
   /* Use full available height */
   background: white;
@@ -660,13 +660,13 @@ input[type="radio"] {
 input[type="radio"]:checked {
   background-color: #fff;
   /* Keep background white */
-  border-color: #2196F3;
+  border-color: #2196f3;
   /* Blue border when selected */
 }
 
 /* Inner blue circle when radio button is selected */
 input[type="radio"]:checked::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   /* Center vertically */
@@ -676,7 +676,7 @@ input[type="radio"]:checked::after {
   /* Size of the inner blue circle */
   height: 8px;
   /* Size of the inner blue circle */
-  background-color: #2196F3;
+  background-color: #2196f3;
   /* Blue inner circle */
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -752,7 +752,7 @@ input[type="radio"]:checked::after {
 
 /* draw the inner dot only when checked */
 .card-row2-col2 .right-options input[type="radio"]::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
@@ -791,7 +791,7 @@ input[type="radio"]:checked::after {
   grid-template-rows: 10% 70% 20% !important;
 } */
 
-.main-row1>.card-row1-col2-3-4-5:first-child {
+.main-row1 > .card-row1-col2-3-4-5:first-child {
   grid-template-rows: 8% 85% 0%;
 }
 
@@ -1075,7 +1075,7 @@ input[type="radio"]:checked::after {
   color: #ff5722;
 }
 
-.mild-label input:checked+span,
+.mild-label input:checked + span,
 .moderate-label input:checked,
 .severe-label input:checked {
   font-weight: bold;
