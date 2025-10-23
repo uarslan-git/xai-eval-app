@@ -87,16 +87,30 @@ function set_participant_diagnosis(val) {
         return false;
     }
 
-    if (val === "healthy") {
-        document.getElementById("radio-healthy").checked = true;
-    } else if (val === "ocdegen") {
-        document.getElementById("radio-unhealthy").checked = true;
-    } else {
-        console.error("Invalid value:", val);
-        return false;
+    const radioMapping = {
+        "healthy": "radio-healthy",
+        "mild": "radio-mild",
+        "mild ocdegen": "radio-mild",
+        "moderate": "radio-moderate",
+        "moderate ocdegen": "radio-moderate",
+        "severe": "radio-severe",
+        "severe ocdegen": "radio-severe",
+        "ocdegen": "radio-unhealthy",
+        "unhealthy": "radio-unhealthy",
+        "critical ocdegen": "radio-unhealthy"
+    };
+
+    const radioId = radioMapping[val];
+    if (radioId) {
+        const radioElement = document.getElementById(radioId);
+        if (radioElement) {
+            radioElement.checked = true;
+            return true;
+        }
     }
 
-    return true;
+    console.error("Invalid diagnosis value:", val);
+    return false;
 }
 
 function clear_radio_buttons() {
@@ -610,3 +624,206 @@ window.addEventListener('popstate', () => {
   button_toggle_next_or_submit();
 });
 
+
+// ========================================
+// INTERACTIVE FEATURES: EVIDENCE & HEATMAPS
+// ========================================
+
+class InteractiveFeatures {
+  constructor() {
+    this.evidenceRow = document.getElementById('evidence-row');
+    this.evidenceForList = document.getElementById('evidence-for-list');
+    this.evidenceAgainstList = document.getElementById('evidence-against-list');
+    this.evidenceForDiagnosis = document.getElementById('evidence-for-diagnosis');
+    this.evidenceAgainstDiagnosis = document.getElementById('evidence-against-diagnosis');
+    this.modal = document.getElementById('visualization-modal');
+    this.modalTitle = document.getElementById('modal-title');
+    this.modalBody = document.getElementById('modal-body');
+    this.modalClose = document.querySelector('.modal-close');
+    this.currentDiagnosis = null;
+
+    this.init();
+  }
+
+  init() {
+    console.log('InteractiveFeatures: Initializing...');
+
+    // Radio button change listener
+    const radioButtons = document.getElementsByName('health');
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', () => {
+        this.currentDiagnosis = radio.value;
+        this.showEvidenceRow();
+        this.fetchEvidence();
+      });
+    });
+
+    // Heatmap buttons
+    const heatmapBtns = document.querySelectorAll('.heatmap-btn');
+    heatmapBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const heatmapNum = e.target.dataset.heatmap;
+        this.viewHeatmap(heatmapNum);
+      });
+    });
+
+    // Modal close
+    if (this.modalClose) {
+      this.modalClose.addEventListener('click', () => this.closeModal());
+    }
+
+    // Click outside modal to close
+    if (this.modal) {
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) {
+          this.closeModal();
+        }
+      });
+    }
+  }
+
+  showEvidenceRow() {
+    if (this.evidenceRow) {
+      this.evidenceRow.style.display = 'grid';
+    }
+  }
+
+  hideEvidenceRow() {
+    if (this.evidenceRow) {
+      this.evidenceRow.style.display = 'none';
+    }
+  }
+
+  async fetchEvidence() {
+    if (!this.currentDiagnosis) {
+      console.log('No diagnosis selected');
+      return;
+    }
+
+    console.log(`Fetching evidence for: ${this.currentDiagnosis}`);
+
+    try {
+      const patientId = get_patient_id_from_url() || 'patient_1';
+      const response = await fetch(`/api/evidence?diagnosis=${this.currentDiagnosis}&patientId=${patientId}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Evidence data received:', data);
+
+      this.displayEvidence(data);
+    } catch (error) {
+      console.error('Error fetching evidence:', error);
+      this.displayMockEvidence();
+    }
+  }
+
+  displayEvidence(data) {
+    // Clear existing content
+    this.evidenceForList.innerHTML = '';
+    this.evidenceAgainstList.innerHTML = '';
+
+    // Update diagnosis labels
+    const diagnosisLabel = this.getDiagnosisLabel(this.currentDiagnosis);
+    this.evidenceForDiagnosis.textContent = diagnosisLabel;
+    this.evidenceAgainstDiagnosis.textContent = diagnosisLabel;
+
+    // Display evidence for
+    if (data.evidenceFor && data.evidenceFor.length > 0) {
+      data.evidenceFor.forEach((item) => {
+        const div = this.createEvidenceItem(item, 'for');
+        this.evidenceForList.appendChild(div);
+      });
+    } else {
+      this.evidenceForList.innerHTML = '<p style="padding: 10px; color: #999;">No evidence found</p>';
+    }
+
+    // Display evidence against
+    if (data.evidenceAgainst && data.evidenceAgainst.length > 0) {
+      data.evidenceAgainst.forEach((item) => {
+        const div = this.createEvidenceItem(item, 'against');
+        this.evidenceAgainstList.appendChild(div);
+      });
+    } else {
+      this.evidenceAgainstList.innerHTML = '<p style="padding: 10px; color: #999;">No evidence found</p>';
+    }
+  }
+
+  displayMockEvidence() {
+    const mockData = {
+      evidenceFor: [
+        { concept: 'Strong Spine Bend', description: 'Significant curvature detected in spine region', importance: 0.85 },
+        { concept: 'Bone Variation', description: 'Unusual bone density patterns observed', importance: 0.72 },
+        { concept: 'Head Position', description: 'Abnormal head positioning indicates possible condition', importance: 0.68 }
+      ],
+      evidenceAgainst: [
+        { concept: 'Normal Structure', description: 'Main bone structure appears within normal range', importance: 0.45 },
+        { concept: 'Healthy Density', description: 'Bone density in acceptable range', importance: 0.38 }
+      ]
+    };
+
+    this.displayEvidence(mockData);
+  }
+
+  createEvidenceItem(item, type) {
+    const div = document.createElement('div');
+    div.className = `evidence-item ${type}`;
+    div.innerHTML = `
+      <div class="evidence-concept">${item.concept}</div>
+      <div class="evidence-description">${item.description}</div>
+      <div class="evidence-importance">Importance: ${Math.round(item.importance * 100)}%</div>
+    `;
+    return div;
+  }
+
+  getDiagnosisLabel(value) {
+    const labels = {
+      'healthy': 'Healthy',
+      'mild': 'Mild OCDegen',
+      'moderate': 'Moderate OCDegen',
+      'severe': 'Severe OCDegen',
+      'unhealthy': 'Critical OCDegen'
+    };
+    return labels[value] || value;
+  }
+
+  async viewHeatmap(heatmapNum) {
+    console.log(`Viewing heatmap ${heatmapNum}`);
+
+    const patientId = get_patient_id_from_url() || '1';
+    const conceptNum = heatmapNum;
+
+    // Try to use the concept images from the current page
+    const conceptImage = document.getElementById(`concept-card-${conceptNum}-image`);
+
+    if (conceptImage && conceptImage.src) {
+      this.showModal(`Concept ${conceptNum} Heatmap`, conceptImage.src);
+    } else {
+      // Fallback to mock or placeholder
+      this.showModal(`Concept ${conceptNum} Heatmap`, `img/placeholder_heatmap_${heatmapNum}.png`);
+    }
+  }
+
+  showModal(title, imageSrc) {
+    this.modalTitle.textContent = title;
+    this.modalBody.innerHTML = `<img src="${imageSrc}" alt="${title}" onerror="this.src='img/placeholder.png'">`;
+    this.modal.style.display = 'flex';
+  }
+
+  closeModal() {
+    this.modal.style.display = 'none';
+  }
+}
+
+// Initialize interactive features when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    new InteractiveFeatures();
+  }, 100);
+});
+
+function get_patient_id_from_url() {
+  return get_participant_id_from_url();
+}

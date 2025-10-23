@@ -292,73 +292,91 @@ function cb_event_get_evidence(req, res) {
     console.log(`[EVIDENCE API] Request received - diagnosis: ${diagnosis}, patient: ${patientId}`);
     console.log(`[EVIDENCE API] Full query params:`, req.query);
     
-    // Mock evidence data - this would typically come from your AI model
-    const mockEvidence = {
-        evidenceFor: [
-            {
-                concept: "Bone Density Analysis",
-                importance: 0.85,
-                description: "High bone density consistent with healthy tissue structure"
-            },
-            {
-                concept: "Joint Alignment",
-                importance: 0.72,
-                description: "Normal joint spacing and alignment patterns observed"
-            },
-            {
-                concept: "Cortical Thickness",
-                importance: 0.68,
-                description: "Appropriate cortical bone thickness for patient age"
-            }
-        ],
-        evidenceAgainst: [
-            {
-                concept: "Shadow Artifacts",
-                importance: 0.35,
-                description: "Minor imaging artifacts present in some regions"
-            },
-            {
-                concept: "Age-related Changes",
-                importance: 0.19,
-                description: "Minimal age-related bone changes detected"
-            }
-        ]
-    };
+    // Mock evidence data based on diagnosis severity
+    let mockEvidence = {};
     
-    // Adjust evidence based on diagnosis
-    if (diagnosis === 'unhealthy') {
-        mockEvidence.evidenceFor = [
-            {
-                concept: "Bone Degeneration",
-                importance: 0.92,
-                description: "Clear signs of OCDegen with characteristic bone deterioration"
-            },
-            {
-                concept: "Joint Space Narrowing",
-                importance: 0.78,
-                description: "Significant reduction in joint space indicating disease progression"
-            },
-            {
-                concept: "Cortical Thinning",
-                importance: 0.71,
-                description: "Notable thinning of cortical bone structure"
-            }
-        ];
-        mockEvidence.evidenceAgainst = [
-            {
-                concept: "Partial Preservation",
-                importance: 0.45,
-                description: "Some areas show preserved bone structure"
-            },
-            {
-                concept: "Imaging Quality",
-                importance: 0.23,
-                description: "Image quality may affect precise diagnosis"
-            }
-        ];
+    switch(diagnosis) {
+        case 'healthy':
+            mockEvidence = {
+                evidenceFor: [
+                    { concept: "Normal Bone Density", importance: 0.88, description: "Bone density within healthy range for age" },
+                    { concept: "Proper Joint Alignment", importance: 0.85, description: "All joints show correct alignment and spacing" },
+                    { concept: "Strong Cortical Structure", importance: 0.82, description: "Cortical bone shows excellent structural integrity" },
+                    { concept: "No Degeneration Signs", importance: 0.79, description: "No visible signs of bone degeneration detected" }
+                ],
+                evidenceAgainst: [
+                    { concept: "Minor Imaging Artifacts", importance: 0.25, description: "Some minor artifacts present in imaging" },
+                    { concept: "Natural Variation", importance: 0.18, description: "Slight natural anatomical variations" }
+                ]
+            };
+            break;
+            
+        case 'mild':
+            mockEvidence = {
+                evidenceFor: [
+                    { concept: "Early Bone Changes", importance: 0.65, description: "Very early signs of bone structure changes" },
+                    { concept: "Minor Density Reduction", importance: 0.58, description: "Slight reduction in bone density detected" },
+                    { concept: "Subtle Joint Narrowing", importance: 0.52, description: "Minimal joint space narrowing observed" }
+                ],
+                evidenceAgainst: [
+                    { concept: "Mostly Normal Structure", importance: 0.72, description: "Most bone structure remains normal" },
+                    { concept: "Good Joint Function", importance: 0.68, description: "Joint functionality appears preserved" },
+                    { concept: "Adequate Cortical Thickness", importance: 0.61, description: "Cortical bone thickness still adequate" }
+                ]
+            };
+            break;
+            
+        case 'moderate':
+            mockEvidence = {
+                evidenceFor: [
+                    { concept: "Noticeable Bone Loss", importance: 0.78, description: "Clear evidence of bone density loss" },
+                    { concept: "Joint Space Reduction", importance: 0.75, description: "Moderate reduction in joint spacing" },
+                    { concept: "Cortical Thinning", importance: 0.71, description: "Visible thinning of cortical bone" },
+                    { concept: "Structural Weakening", importance: 0.68, description: "Signs of structural weakening present" }
+                ],
+                evidenceAgainst: [
+                    { concept: "Partial Preservation", importance: 0.52, description: "Some areas show preserved structure" },
+                    { concept: "Treatable Stage", importance: 0.48, description: "Condition appears treatable at this stage" }
+                ]
+            };
+            break;
+            
+        case 'severe':
+            mockEvidence = {
+                evidenceFor: [
+                    { concept: "Significant Degeneration", importance: 0.89, description: "Severe bone degeneration clearly visible" },
+                    { concept: "Major Joint Damage", importance: 0.86, description: "Substantial joint space loss and damage" },
+                    { concept: "Advanced Thinning", importance: 0.83, description: "Advanced cortical bone thinning" },
+                    { concept: "Structural Compromise", importance: 0.81, description: "Major structural compromise evident" },
+                    { concept: "Multiple Biomarkers", importance: 0.78, description: "Multiple OCDegen biomarkers present" }
+                ],
+                evidenceAgainst: [
+                    { concept: "Small Healthy Regions", importance: 0.32, description: "Very small regions show healthier tissue" },
+                    { concept: "Treatment Possibility", importance: 0.28, description: "Aggressive treatment may still help" }
+                ]
+            };
+            break;
+            
+        case 'unhealthy':
+        default:
+            mockEvidence = {
+                evidenceFor: [
+                    { concept: "Critical Bone Degeneration", importance: 0.95, description: "Severe and extensive bone deterioration" },
+                    { concept: "Complete Joint Collapse", importance: 0.92, description: "Near-complete loss of joint structure" },
+                    { concept: "Extreme Cortical Loss", importance: 0.91, description: "Extreme thinning or loss of cortical bone" },
+                    { concept: "Advanced Disease Stage", importance: 0.89, description: "All markers indicate advanced disease" },
+                    { concept: "Systemic Involvement", importance: 0.87, description: "Multiple bone systems affected" },
+                    { concept: "Irreversible Damage", importance: 0.84, description: "Evidence suggests irreversible damage" }
+                ],
+                evidenceAgainst: [
+                    { concept: "Minimal Preservation", importance: 0.18, description: "Extremely limited healthy tissue remains" },
+                    { concept: "Late Detection", importance: 0.15, description: "Disease detected at very late stage" }
+                ]
+            };
+            break;
     }
     
-    console.log(`[EVIDENCE API] Sending response:`, mockEvidence);
+    console.log(`[EVIDENCE API] Sending response for ${diagnosis}:`, mockEvidence);
     res.json(mockEvidence);
 }
 

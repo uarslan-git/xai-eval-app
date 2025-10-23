@@ -1,9 +1,9 @@
 :root {
   /*My Browser Inner Width and Height: 1484px  x  756px*/
   /*HD Screen Resolution : 1920px x 1080px*/
-  --fixed-screen-width: 1420px;
+  --fixed-screen-width: 1800px;
   /* 1920px  */
-  --fixed-screen-height: 800px;
+  --fixed-screen-height: 1000px;
   /* 1080px */
   --app-width: calc(var(--fixed-screen-width) * (1 - 0.0));
   /*reduce app-width */
@@ -169,17 +169,19 @@ main {
   display: grid;
   /* 60% 38%; */
   /* Adjust the height of row1 and row2*/
-  grid-template-rows: calc(var(--body-height) * 0.6)
-    /* 10% of --app-height */
-    calc(var(--body-height) * 0.3);
-  /* 10% of --app-height */
+  grid-template-rows: calc(var(--body-height) * 0.48)
+    /* row1: patient + concepts */
+    calc(var(--body-height) * 0.28)
+    /* row2: diagnosis */
+    calc(var(--body-height) * 0.32);
+  /* row3: evidence + heatmaps */
   column-gap: 1px;
   /* 10px gap between columns */
-  row-gap: 0px;
-  /* 5px gap between rows */
-  padding: 0.1rem;
+  row-gap: 8px;
+  /* 8px gap between rows */
+  padding: 0.5rem;
   background: var(--bg-main);
-  overflow-y: hidden;
+  overflow-y: auto;
   /*viki_comment: The following Disable : For the main columns to be full length*/
   /*
     align-items: center;
@@ -192,13 +194,13 @@ main {
   background: none;
   border-radius: 8px;
   grid-template-columns: var(--grid-template-row1-columns);
-  height: var(--row1-height);
-  /* Fixed height */
+  height: 100%;
+  /* Use full available height */
   border: var(--border1);
-  overflow: hidden;
-  column-gap: 5px;
+  overflow: visible;
+  column-gap: 10px;
   padding: 0.5rem;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.20); */
 }
@@ -209,10 +211,10 @@ main {
   border-radius: 8px;
   grid-template-columns: 1.5fr 2.5fr 1.5fr;
   /*60% 39%*/
-  height: var(--row2-height);
-  /* Fixed height */
-  overflow: hidden;
-  column-gap: 0.25rem;
+  height: 100%;
+  /* Use full available height */
+  overflow: visible;
+  column-gap: 10px;
   padding: 0.5rem;
   /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.20); */
 }
@@ -225,8 +227,8 @@ main {
   gap: 1px;
   /* 5px gap between elements */
 
-  height: var(--row1-card-height);
-  /* Fixed height */
+  height: 100%;
+  /* Use full available height */
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.20);
   border-radius: 8px;
@@ -464,14 +466,15 @@ button[disabled]:hover {
   /* 5px gap between elements */
   width: 100%;
   /* Ensure card width matches the width of column 2 */
-  height: var(--row2-card-height);
-  /* Fixed height */
+  height: 100%;
+  /* Use full available height */
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-left: 0;
   font-size: 15px;
+  padding: 15px;
 }
 
 .card-row2-col2 {
@@ -480,13 +483,14 @@ button[disabled]:hover {
   /* 5px gap between elements */
   width: 100%;
   /* Ensure card width matches the width of column 2 */
-  height: var(--row2-card-height);
-  /* Fixed height */
+  height: 100%;
+  /* Use full available height */
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  overflow: hidden;
+  overflow-y: auto;
   margin-left: 0;
+  padding: 15px;
 }
 
 /* Card Title */
@@ -694,29 +698,45 @@ input[type="radio"]:checked::after {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.3rem 0.5rem !important;
-  border-radius: 5px;
+  padding: 0.5rem 0.8rem !important;
+  border-radius: 6px;
   /* pill shape */
   cursor: pointer;
   font-weight: bold;
-  width: 10rem !important;
-}
-
-
-.card-row2-col2 .right-options .healthy-label {
-  /* background-color: var(--green); */
-  background: linear-gradient(to top, var(--green), #229b62);
-  /* consistent with your green button */
-  color: white;
+  width: 12rem !important;
+  transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-row2-col2 .right-options label:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.card-row2-col2 .right-options .healthy-label {
+  background: linear-gradient(to top, var(--green), #229b62);
+  color: white;
+}
+
+.card-row2-col2 .right-options .mild-label {
+  background: linear-gradient(to top, #ffc107, #ffcd38);
+  color: #000;
+}
+
+.card-row2-col2 .right-options .moderate-label {
+  background: linear-gradient(to top, #ff9800, #ffa726);
+  color: white;
+}
+
+.card-row2-col2 .right-options .severe-label {
+  background: linear-gradient(to top, #ff5722, #ff7043);
+  color: white;
 }
 
 .card-row2-col2 .right-options .unhealthy-label {
   background: linear-gradient(to top, var(--orange), #f07d5f);
   color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* 2. Ensure the radio circle is visible again */
@@ -777,4 +797,276 @@ input[type="radio"]:checked::after {
 
 .hidden {
   display: none;
+}
+
+/* ========================================
+   ROW 3: EVIDENCE AND HEATMAPS
+   ======================================== */
+
+.main-row3 {
+  display: grid;
+  background: none;
+  border-radius: 8px;
+  grid-template-columns: 1fr 1fr;
+  /* Two equal columns */
+  height: 100%;
+  /* Use full available height */
+  border: var(--border2);
+  overflow: visible;
+  column-gap: 10px;
+  padding: 0.5rem;
+}
+
+/* Evidence Panel */
+.card-row3-col1 {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  border: none;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.card-row3-col1:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.evidence-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: none;
+}
+
+.evidence-section {
+  margin-bottom: 15px;
+}
+
+.evidence-title {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.evidence-for {
+  background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+  color: white;
+}
+
+.evidence-against {
+  background: linear-gradient(135deg, #ee6c4d 0%, #ff8566 100%);
+  color: white;
+}
+
+.evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evidence-item {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.evidence-item:hover {
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.evidence-item.for {
+  border-left-color: #198754;
+}
+
+.evidence-item.against {
+  border-left-color: #ee6c4d;
+}
+
+.evidence-concept {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+.evidence-description {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.evidence-importance {
+  font-size: 11px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* Heatmaps Panel */
+.card-row3-col2 {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  border: none;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.card-row3-col2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.visualizations-container {
+  flex-grow: 1;
+}
+
+.heatmaps-section {
+  margin-top: 10px;
+}
+
+.heatmaps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.heatmap-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.heatmap-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.heatmap-btn:active {
+  transform: translateY(0);
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-body img {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Additional diagnosis options styling */
+.mild-label {
+  color: #ffc107;
+}
+
+.moderate-label {
+  color: #ff9800;
+}
+
+.severe-label {
+  color: #ff5722;
+}
+
+.mild-label input:checked+span,
+.moderate-label input:checked,
+.severe-label input:checked {
+  font-weight: bold;
 }
