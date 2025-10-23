@@ -9,9 +9,33 @@ let input = null;
 
 const button_next = document.getElementById("button-next");
 const button_prev = document.getElementById("button-prev");
+const button_submit = document.getElementById("button-submit");
 const radio_buttons = document.getElementsByName("health");
+const patient_id1 = document.getElementById("patient-id-location1");
 const patient_id2 = document.getElementById("patient-id-location2");
+const x_ray_location = document.getElementById("x-ray-location");
+const suggested_diag1 = document.getElementById("suggested-diag-location1");
+const suggested_diag2 = document.getElementById("suggested-diag-location2");
+const true_diag   = document.getElementById("true-diag");
 const x_ray_image = document.getElementById("patient-x-ray-image");
+const x_ray_trait_span = document.getElementById("X_RAY_Trait");
+
+function redirectIfFinished() {
+    const pid = get_participant_id_from_url();
+    const sid = get_study_id_from_url();
+    if (sessionStorage.getItem(`study_done_${pid}_${sid}`) === 'true') {
+        window.location.replace(`/feedback/index.html?participant_id=${pid}&study_id=${sid}`);
+    }
+}
+
+/* run on normal page load */
+redirectIfFinished();
+
+/* run again if the page is restored from bfcache */
+window.addEventListener('pageshow', (evt) => {
+    if (evt.persisted) redirectIfFinished();
+});
+
 
 let diagnosis = null;
 
@@ -83,20 +107,17 @@ function clear_radio_buttons() {
 
 function set_progress(current_page_nr, total_page_count) {
     let progress_value = (current_page_nr / total_page_count) * 100; // Convert to percentage
-    let progress_bar = document.querySelector("footer .progress-bar");
+    let progress_bar = document.querySelector("header .progress-bar");
     progress_bar.style.width = progress_value + "%";
 
-    document.getElementById("progress-bar-text").textContent = "Diagnosis " + current_page_nr.toString() + "/" + total_page_count.toString();
+    // document.getElementById("progress-bar-text").textContent = "Diagnosis " + current_page_nr.toString() + "/" + total_page_count.toString();
+    document.getElementById("progress-bar-text").textContent =  `Diagnosis ${current_page_nr}/${total_page_count}`;
 }
 
 function set_patient_id(id)
 {
-    patient_id2.textContent = "Patient ID: " + id.toString();
-    
-    // Notify interactive features of the current patient
-    if (window.interactiveFeatures) {
-        window.interactiveFeatures.setCurrentPatientId(id.toString());
-    }
+    patient_id1.textContent = id.toString();
+    patient_id2.textContent = "X-Ray ID: " + id.toString();
 }
 
 function set_x_ray_image(src)
@@ -107,6 +128,10 @@ function set_x_ray_image(src)
 function get_x_ray_image()
 {
     return x_ray_image.src;
+}
+
+function set_x_ray_trait(val) {
+    x_ray_trait_span.textContent = val;
 }
 
 function get_params_from_url()
@@ -122,17 +147,41 @@ function get_params_from_url()
     };
 }
 
-function update_study_url(participant_id, study_id, study_type, page_nr, total_pages)
-{
-    let new_url = "/study_id_";
-    new_url += study_id + "/";
-    new_url += "index.html?";
-    new_url += "participant_id=" +participant_id;
-    new_url += "&study_id=" + study_id;
-    new_url += "&study_type=" + study_type;
-    new_url += "&page_nr=" + page_nr;
-    new_url += "&total_pages=" + total_pages;
-    window.location.href = new_url;
+
+function update_study_url(participant_id, study_id, study_type, page_nr, total_pages){
+  const new_url =
+    `/study_id_${study_id}/index.html?` +
+    `participant_id=${participant_id}&study_id=${study_id}` +
+    `&study_type=${study_type}&page_nr=${page_nr}&total_pages=${total_pages}`;
+
+  /* swap the URL only */
+  history.pushState(null, '', new_url);   // no reload
+
+  /* refresh just the dynamic bits already in memory */
+  clear_radio_buttons();
+  csv_json_get_all_attributes_and_set_in_html_page(page_nr);
+  db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr);
+  button_toggle_next_or_submit();
+}
+
+async function log_page_visit(participant_id, study_id, page_nr) {
+    console.log('logging visit:', participant_id, study_id, page_nr);
+
+    try {
+        const response = await fetch('/log_visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ participant_id, study_id, page_nr })
+        });
+
+        const response_data = await response.json(); // Read JSON response
+
+        if (!response.ok) {
+            console.error('Failed to log visit:', response_data);
+        }
+    } catch (error) {
+        console.error('Error logging visit:', error);
+    }
 }
 
 async function db_update_async()
@@ -197,61 +246,76 @@ async function db_update() {
     }
 }
 
-function db_update_success_action(participant_id, study_id, current_page_nr)
-{
-    up = get_params_from_url();
+function db_update_success_action(participant_id, study_id, current_page_nr) {
     //Last Page
-    if(current_page_nr >= csv_json_get_total_page_count())
-    {
-        let feedback_url = "/feedback/index.html?";
-        feedback_url += "participant_id=" +participant_id;
-        feedback_url += "&study_id=" + study_id;
-        window.location.href = feedback_url; // Redirect to test.html
+    if (current_page_nr >= csv_json_get_total_page_count()) {
+        const feedback_url = `/feedback/index.html?participant_id=${participant_id}&study_id=${study_id}`;
+
+        /* NEW — remember that this study is done in this tab */
+        sessionStorage.setItem(`study_done_${participant_id}_${study_id}`, 'true');
+
+        window.location.replace(feedback_url);
         return;
     }
 
     //increment page number
     page_nr = current_page_nr + 1;
+    up = get_params_from_url();
     update_study_url(participant_id, study_id, up.study_type, page_nr, up.total_pages);
     clear_radio_buttons();
-
     csv_json_get_all_attributes_and_set_in_html_page(page_nr);
     db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr);
     button_toggle_next_or_submit();
+    log_page_visit(participant_id, study_id, page_nr);
 }
 
-function button_toggle_next_or_submit()
-{
-    up = get_params_from_url();
-    total_pages = parseInt(up.total_pages, 10);
-    curr_page = parseInt(up.page_nr, 10);
+function button_toggle_next_or_submit() {
+    const up = get_params_from_url();
+    let total_pages = parseInt(up.total_pages, 10);
+    let curr_page = parseInt(up.page_nr, 10);
+
+    // If page_nr is missing or not a number, treat it as page 1
+    if (isNaN(curr_page) || curr_page < 1) { curr_page = 1; }
+    if (isNaN(total_pages) || total_pages < 1) { total_pages = 1; }
+
+    /* default state: show both buttons in normal style */
+    button_prev.style.display = 'inline-block';
+    button_prev.disabled = false;
+    button_next.style.display = 'inline-block';
+    button_next.disabled = get_radio_button_status() === null;
+    button_submit.disabled = true;
+
+    /* ---- first page: hide Prev ---- */
+    if (curr_page === 1) {
+        // button_prev.style.display = 'none';
+        button_prev.disabled = true;
+        return;
+    }
+
+    /* last page: show Prev + floating Submit */
     if (curr_page === total_pages) {
-        //Change Button Next to Submit
-        button_next.textContent = "Submit";
-    }else{
-        button_next.textContent = "Next";
+        button_next.disabled = true;
+        return;
     }
 }
 
-function db_update_duplicate_entry_action(participant_id, study_id, current_page_nr)
-{
-    up = get_params_from_url();
+function db_update_duplicate_entry_action(participant_id, study_id, current_page_nr) {
     //Last Page
-    if(current_page_nr >= csv_json_get_total_page_count())
-    {
-        window.location.href = "/feedback/index.html"; // Redirect to test.html
+    if (current_page_nr >= csv_json_get_total_page_count()) {
+        sessionStorage.setItem(`study_done_${participant_id}_${study_id}`, 'true');
+        window.location.replace(`/feedback/index.html?participant_id=${participant_id}&study_id=${study_id}`);
         return;
     }
 
     //increment page number
     page_nr = current_page_nr + 1;
+    up = get_params_from_url();
     update_study_url(participant_id, study_id, up.study_type, page_nr, up.total_pages);
     clear_radio_buttons();
     csv_json_get_all_attributes_and_set_in_html_page(page_nr);
     db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr);
+    log_page_visit(participant_id, study_id, page_nr);
 }
-
-
 
 function next_button_action()
 {
@@ -265,7 +329,6 @@ function next_button_action()
 }
 
 async function db_get_and_set_participant_diagnosis_prev_button_click(participant_id, study_id, page_nr) {
-    up = get_params_from_url();
     console.log("db_get_and_set_participant_diagnosis_prev_button_click");
     try {
         const response = await fetch(`/read_db_prev?participant_id=${participant_id}&study_id=${study_id}&page_nr=${page_nr}`);
@@ -274,16 +337,20 @@ async function db_get_and_set_participant_diagnosis_prev_button_click(participan
         if (Array.isArray(data) && data.length > 0) {
             diagnosis = data[0].participant_diagnosis;
             //First URL Update
+            up = get_params_from_url();
             update_study_url(participant_id, study_id, up.study_type, page_nr, up.total_pages);
             set_participant_diagnosis(diagnosis);
             //Set all attributes from csv_json info
             csv_json_get_all_attributes_and_set_in_html_page(page_nr);
+            log_page_visit(participant_id, study_id, page_nr);
             console.log(diagnosis);
         }
+        button_toggle_next_or_submit();
     } catch (error) {
         console.error('Error fetching data:', error);
     }
 }
+
 
 async function db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr) {
     console.log("db_get_participant_diagnosis");
@@ -318,22 +385,67 @@ async function prev_button_action()
     db_get_and_set_participant_diagnosis_prev_button_click(participant_id, study_id, prev_page_nr);
 }
 
+async function radio_button_changed() {
+    let ret = get_radio_button_status();
+    let curr_page_nr = get_page_nr_from_url();
+    const up = get_params_from_url();
+    let total_pages = parseInt(up.total_pages, 10);
+
+    if (ret == null) {
+        button_next.disabled = true;
+        button_submit.disabled = true;
+        return;
+    }
+
+    if (curr_page_nr == total_pages) {
+        button_next.disabled = true;
+        button_submit.disabled = false;
+    } else {
+        button_next.disabled = false;
+        button_submit.disabled = true;
+    }
+}
+
 function set_suggested_diag(value)
 {
-    // Suggested diagnosis display was removed from the UI
-    // This function is kept for compatibility but does nothing
+    suggested_diag1.textContent = value;
+    suggested_diag2.textContent = value;
+
+    p_card = document.getElementById("patient-card");
+
+    if (value == "OCDegen") {
+        // suggested_diag1.className = "";
+        suggested_diag2.className = "";
+        // suggested_diag1.className = "unhealthy"
+        suggested_diag2.className = "unhealthy"
+        p_card.classList.remove('healthy')
+        p_card.classList.add('unhealthy')
+    } else {
+        // suggested_diag1.className = "";
+        suggested_diag2.className = "";
+        // suggested_diag1.className = "healthy"
+        suggested_diag2.className = "healthy"
+        p_card.classList.remove('unhealthy')
+        p_card.classList.add('healthy')
+    }
 }
 
 function set_x_ray_location(value)
 {
-    // X-ray location display was removed from the UI
-    // This function is kept for compatibility but does nothing
+    x_ray_location.textContent = value;
 }
 
 function set_true_diag(value)
 {
-    // True diagnosis display was removed from the UI
-    // This function is kept for compatibility but does nothing
+    true_diag.textContent = value;
+    if(value == "OCDegen"){
+        true_diag.className = ""
+        true_diag.className = "unhealthy"
+    }else{
+        true_diag.className = ""
+        true_diag.className = "healthy"
+    }
+
 }
 
 //get total pagecount for the study
@@ -351,7 +463,8 @@ function csv_json_get_main_attributes(page_nr)
     l_true_diag = input.TRUE_DIAG[index];
     l_suggested_diag = input.SUGGESTED_DIAG[index];
     l_image = "img/" + input.X_RAY_IMAGE[index];
-    attributes = [l_patient_id, l_image, l_x_ray_loc, l_true_diag, l_suggested_diag]
+    l_trait = input.X_RAY_TRAIT ? input.X_RAY_TRAIT[index] : "";
+    attributes = [l_patient_id, l_image, l_x_ray_loc, l_true_diag, l_suggested_diag, l_trait]
     return attributes;
 }
 
@@ -361,6 +474,7 @@ function set_main_attributes_in_html_page(page_nr, attr)
     set_patient_id(attr[0]);
     set_x_ray_image(attr[1]);
     set_x_ray_location(attr[2]);
+    set_x_ray_trait(attr[5]);
     set_true_diag(attr[3]);
     set_suggested_diag(attr[4])
     set_progress(page_nr, csv_json_get_total_page_count());
@@ -370,6 +484,51 @@ function csv_json_get_all_attributes_and_set_in_html_page(page_nr)
 {
     attr = csv_json_get_main_attributes(page_nr);
     set_main_attributes_in_html_page(page_nr, attr);
+    attr = csv_json_get_additional_attributes(page_nr);
+    set_additional_attributes_in_html_page(page_nr, attr);
+}
+
+function csv_json_get_additional_attributes(page_nr)
+{
+    index = page_nr - 1;
+    l_patient_id = input.PATIENT_ID[index];
+
+    concept_card_1_title    = "Concept 1";
+    concept_card_1_image    = input.Concept1 ? ("img/" + input.Concept1[index]) : "";
+    concept_card_1_caption  = input.Concept1_Caption ? ("Concept: " + input.Concept1_Caption[index]) : "";
+
+    concept_card_2_title    = "Concept 2";
+    concept_card_2_image    = input.Concept2 ? ("img/" + input.Concept2[index]) : "";
+    concept_card_2_caption  = input.Concept2_Caption ? ("Concept: " + input.Concept2_Caption[index]) : "";
+
+    concept_card_3_title    = "Concept 3";
+    concept_card_3_image    = input.Concept3 ? ("img/" + input.Concept3[index]) : "";
+    concept_card_3_caption  = input.Concept3_Caption ? ("Concept: " + input.Concept3_Caption[index]) : "";
+
+    attributes = [concept_card_1_title, concept_card_1_image, concept_card_1_caption,
+                  concept_card_2_title, concept_card_2_image, concept_card_2_caption,
+                  concept_card_3_title, concept_card_3_image, concept_card_3_caption];
+
+    return attributes;
+}
+
+function set_additional_attributes_in_html_page(page_nr, attr)
+{
+    const concept1Title = document.getElementById("concept-card-1-title");
+    const concept1Image = document.getElementById("concept-card-1-image");
+    const concept2Title = document.getElementById("concept-card-2-title");
+    const concept2Image = document.getElementById("concept-card-2-image");
+    const concept3Title = document.getElementById("concept-card-3-title");
+    const concept3Image = document.getElementById("concept-card-3-image");
+
+    if (concept1Title) concept1Title.textContent = attr[0];
+    if (concept1Image) concept1Image.src = attr[1];
+
+    if (concept2Title) concept2Title.textContent = attr[3];
+    if (concept2Image) concept2Image.src = attr[4];
+
+    if (concept3Title) concept3Title.textContent = attr[6];
+    if (concept3Image) concept3Image.src = attr[7];
 }
 
 async function init_page()
@@ -385,6 +544,7 @@ async function init_page()
     let page_nr = get_page_nr_from_url();
     db_get_and_set_participant_diagnosis(participant_id, study_id, page_nr);
     csv_json_get_all_attributes_and_set_in_html_page(page_nr);
+    log_page_visit(participant_id, study_id, page_nr);
 }
 
 async function load_json_data() {
@@ -403,838 +563,50 @@ async function load_json_data() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('DOM Content Loaded - initializing components');
     await load_json_data();
-    
-    // Initialize interactive features after DOM is ready
-    console.log('About to create InteractiveFeatures instance');
-    window.interactiveFeatures = new InteractiveFeatures();
-    console.log('InteractiveFeatures instance created:', window.interactiveFeatures);
 });
 
 button_next.addEventListener("click", function() {
     next_button_action();
 });
 
-button_prev.addEventListener("click", function() {
+button_submit.addEventListener("click", function () {
+    next_button_action();
+});
+
+button_prev.addEventListener("click", function () {
     prev_button_action();
 });
 
-// Interactive Features - Evidence and SHAP Visualizations
-class InteractiveFeatures {
-    constructor() {
-        this.initializeEventListeners();
-        this.currentPatientId = null;
-    }
 
-    initializeEventListeners() {
-        console.log('InteractiveFeatures: Initializing event listeners');
-        
-        // Evidence fetching
-        const fetchEvidenceBtn = document.getElementById('fetch-evidence-btn');
-        
-        console.log('InteractiveFeatures: Found elements', {
-            fetchEvidenceBtn: !!fetchEvidenceBtn
-        });
-        
-        if (fetchEvidenceBtn) {
-            console.log('InteractiveFeatures: Adding click listener to fetch button');
-            fetchEvidenceBtn.addEventListener('click', () => {
-                console.log('InteractiveFeatures: Fetch evidence button clicked!');
-                this.fetchEvidence();
-            });
-        } else {
-            console.error('InteractiveFeatures: fetch-evidence-btn not found!');
-        }
-
-        // Remove diagnosis select functionality since it's no longer needed
-
-        // Evidence type filter
-        const evidenceTypeFilter = document.getElementById('evidence-type-filter');
-        if (evidenceTypeFilter) {
-            evidenceTypeFilter.addEventListener('change', () => {
-                this.filterEvidence();
-            });
-        }
-
-        // SHAP visualization buttons
-        const waterfallBtn = document.getElementById('view-waterfall-btn');
-        if (waterfallBtn) {
-            waterfallBtn.addEventListener('click', () => this.viewWaterfallPlot());
-        }
-
-        const heatmapBtns = document.querySelectorAll('.heatmap-btn');
-        heatmapBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const heatmapNum = e.target.dataset.heatmap;
-                this.viewHeatmap(heatmapNum);
-            });
-        });
-
-        // Modal close functionality
-        const modalClose = document.querySelector('.modal-close');
-        const modal = document.getElementById('visualization-modal');
-        
-        if (modalClose && modal) {
-            modalClose.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            // Close modal when clicking outside
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-    }
-
-    setCurrentPatientId(patientId) {
-        this.currentPatientId = patientId;
-        // Load visualizations when patient ID is set
-        this.loadPatientVisualizations(patientId);
-    }
-
-    async loadPatientVisualizations(patientId) {
-        console.log('Loading visualizations for patient:', patientId);
-        
-        try {
-            const response = await fetch(`/api/visualizations/${patientId}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch visualizations: ${response.status}`);
-            }
-            
-            const visualizations = await response.json();
-            console.log('Received visualizations:', visualizations);
-            
-            this.updateVisualizationButtons(visualizations);
-        } catch (error) {
-            console.error('Error loading patient visualizations:', error);
-            // Show default visualizations on error
-            this.updateVisualizationButtons({
-                heatmaps: [
-                    { id: 1, name: 'Default Heatmap 1', isMock: true },
-                    { id: 2, name: 'Default Heatmap 2', isMock: true }
-                ],
-                waterfall: { name: 'Default Waterfall Plot', isMock: true }
-            });
-        }
-    }
-
-    updateVisualizationButtons(visualizations) {
-        // Update waterfall button
-        const waterfallBtn = document.getElementById('view-waterfall-btn');
-        if (waterfallBtn && visualizations.waterfall) {
-            waterfallBtn.textContent = visualizations.waterfall.name || 'View Waterfall Plot';
-            waterfallBtn.style.display = 'block';
-            if (visualizations.waterfall.isMock) {
-                waterfallBtn.textContent += ' (Mock)';
-                waterfallBtn.style.opacity = '0.7';
-            }
-        }
-
-        // Update heatmap buttons
-        const heatmapsContainer = document.getElementById('heatmaps-container');
-        if (heatmapsContainer) {
-            // Clear existing buttons
-            heatmapsContainer.innerHTML = '';
-            
-            // Add buttons for each available heatmap
-            visualizations.heatmaps.forEach(heatmap => {
-                const button = document.createElement('button');
-                button.className = 'heatmap-btn';
-                button.dataset.heatmap = heatmap.id;
-                button.dataset.url = heatmap.url;
-                button.textContent = heatmap.name;
-                
-                if (heatmap.isMock) {
-                    button.textContent += ' (Mock)';
-                    button.style.opacity = '0.7';
-                }
-                
-                button.addEventListener('click', (e) => {
-                    const heatmapId = e.target.dataset.heatmap;
-                    const heatmapUrl = e.target.dataset.url;
-                    this.viewHeatmap(heatmapId, heatmap.name, heatmapUrl);
-                });
-                
-                heatmapsContainer.appendChild(button);
-            });
-            
-            if (visualizations.heatmaps.length === 0) {
-                heatmapsContainer.innerHTML = '<p style="color: #666; font-style: italic;">No heatmaps available for this patient</p>';
-            }
-        }
-
-        // Store visualizations for later use
-        this.patientVisualizations = visualizations;
-    }
-
-    async fetchEvidence() {
-        console.log('InteractiveFeatures: fetchEvidence called');
-        
-        const evidenceContainer = document.getElementById('evidence-container');
-        const fetchBtn = document.getElementById('fetch-evidence-btn');
-
-        console.log('InteractiveFeatures: Elements check', {
-            evidenceContainer: !!evidenceContainer,
-            fetchBtn: !!fetchBtn
-        });
-
-        if (!evidenceContainer || !fetchBtn) {
-            console.error('InteractiveFeatures: Missing required elements');
-            return;
-        }
-
-        // Default to 'unhealthy' diagnosis for evidence fetching
-        const diagnosis = 'unhealthy';
-        console.log('InteractiveFeatures: Using default diagnosis:', diagnosis);
-
-        // Show loading state
-        fetchBtn.textContent = 'Loading...';
-        fetchBtn.disabled = true;
-
-        try {
-            const response = await fetch(`/api/evidence?diagnosis=${diagnosis}&patientId=${this.currentPatientId || 'unknown'}`);
-            
-            if (!response.ok) {
-                throw new Error('Failed to fetch evidence');
-            }
-
-            const data = await response.json();
-            console.log('InteractiveFeatures: Received data from server:', data);
-            
-            this.displayEvidence(data);
-            
-            console.log('InteractiveFeatures: Setting evidenceContainer display to block');
-            evidenceContainer.style.display = 'block';
-            
-            // Add a temporary visual indicator
-            evidenceContainer.style.border = '2px solid red';
-            evidenceContainer.style.background = 'rgba(255, 255, 0, 0.1)';
-            
-            console.log('InteractiveFeatures: evidenceContainer display set. Current style:', evidenceContainer.style.cssText);
-
-        } catch (error) {
-            console.error('Error fetching evidence:', error);
-            alert('Error fetching evidence. Please try again.');
-        } finally {
-            fetchBtn.textContent = 'Get Evidence';
-            fetchBtn.disabled = false;
-        }
-    }
-
-    displayEvidence(data) {
-        console.log('InteractiveFeatures: displayEvidence called with data:', data);
-        
-        // Store the original data for filtering
-        this.evidenceData = data;
-        
-        const evidenceForList = document.getElementById('evidence-for-list');
-        const evidenceAgainstList = document.getElementById('evidence-against-list');
-        const evidenceFilter = document.querySelector('.evidence-filter');
-
-        console.log('InteractiveFeatures: Evidence list elements', {
-            evidenceForList: !!evidenceForList,
-            evidenceAgainstList: !!evidenceAgainstList
-        });
-
-        if (!evidenceForList || !evidenceAgainstList) {
-            console.error('InteractiveFeatures: Evidence list elements not found');
-            return;
-        }
-
-        // Show the evidence filter
-        if (evidenceFilter) {
-            evidenceFilter.style.display = 'block';
-        }
-
-        // Clear existing content
-        evidenceForList.innerHTML = '';
-        evidenceAgainstList.innerHTML = '';
-
-        console.log('InteractiveFeatures: Processing evidence items');
-        console.log('Evidence For items:', data.evidenceFor?.length);
-        console.log('Evidence Against items:', data.evidenceAgainst?.length);
-
-        // Display evidence for
-        data.evidenceFor.forEach((item, index) => {
-            console.log(`Creating evidence FOR item ${index}:`, item);
-            const evidenceItem = this.createEvidenceItem(item);
-            evidenceForList.appendChild(evidenceItem);
-        });
-
-        // Display evidence against
-        data.evidenceAgainst.forEach((item, index) => {
-            console.log(`Creating evidence AGAINST item ${index}:`, item);
-            const evidenceItem = this.createEvidenceItem(item);
-            evidenceAgainstList.appendChild(evidenceItem);
-        });
-
-        console.log('InteractiveFeatures: Evidence display completed');
-    }
-
-    filterEvidence() {
-        if (!this.evidenceData) return;
-
-        const filterValue = document.getElementById('evidence-type-filter').value;
-        const evidenceForSection = document.querySelector('.evidence-section:has(.evidence-for)');
-        const evidenceAgainstSection = document.querySelector('.evidence-section:has(.evidence-against)');
-
-        // If querySelector doesn't work with :has, use alternative approach
-        const evidenceForSectionAlt = document.querySelector('.evidence-for').closest('.evidence-section');
-        const evidenceAgainstSectionAlt = document.querySelector('.evidence-against').closest('.evidence-section');
-        
-        const forSection = evidenceForSection || evidenceForSectionAlt;
-        const againstSection = evidenceAgainstSection || evidenceAgainstSectionAlt;
-
-        switch (filterValue) {
-            case 'for':
-                // Show only Evidence For
-                if (forSection) forSection.style.display = 'block';
-                if (againstSection) againstSection.style.display = 'none';
-                break;
-            case 'against':
-                // Show only Evidence Against
-                if (forSection) forSection.style.display = 'none';
-                if (againstSection) againstSection.style.display = 'block';
-                break;
-            case 'all':
-            default:
-                // Show both sections
-                if (forSection) forSection.style.display = 'block';
-                if (againstSection) againstSection.style.display = 'block';
-                break;
-        }
-    }
-
-    createEvidenceItem(item) {
-        const div = document.createElement('div');
-        div.className = 'evidence-item clickable-evidence';
-        
-        const importancePercentage = Math.round(item.importance * 100);
-        
-        div.innerHTML = `
-            <div class="evidence-concept">${item.concept}</div>
-            <div class="evidence-description">${item.description}</div>
-            <div class="evidence-importance">Importance: ${importancePercentage}%</div>
-            <div class="evidence-click-hint">💡 Click to view related visualization</div>
-        `;
-
-        // Add click handler to trigger visualization
-        div.addEventListener('click', () => {
-            this.triggerRelatedVisualization(item);
-        });
-
-        // Add hover effects
-        div.addEventListener('mouseenter', () => {
-            div.style.transform = 'translateY(-2px)';
-            div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        });
-
-        div.addEventListener('mouseleave', () => {
-            div.style.transform = 'translateY(0)';
-            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        });
-
-        // Add animation
-        div.style.opacity = '0';
-        div.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            div.style.transition = 'all 0.3s ease-out';
-            div.style.opacity = '1';
-            div.style.transform = 'translateY(0)';
-        }, 100);
-
-        return div;
-    }
-
-    async triggerRelatedVisualization(evidenceItem) {
-        // Simulate API request to backend for visualizations
-        // In real implementation, replace with fetch('/api/visualizations', ...)
-        const mockApiResponse = await this.mockFetchVisualizations(evidenceItem);
-
-        // Render overlay/modal with correct number of visualizations
-        this.renderEvidenceVisualizationsOverlay(evidenceItem, mockApiResponse);
-    }
-
-    // Mock backend API for visualizations
-    async mockFetchVisualizations(evidenceItem) {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Decide number of heatmaps/waterfall plots based on evidence type
-        const concept = evidenceItem.concept.toLowerCase();
-        let numHeatmaps = 0;
-        let numWaterfalls = 0;
-        if (concept.includes('cortical') || concept.includes('white matter') || concept.includes('hippocampal') || concept.includes('amygdala') || concept.includes('ventricular') || concept.includes('lesion') || concept.includes('spine') || concept.includes('bone') || concept.includes('structure') || concept.includes('density') || concept.includes('intensity') || concept.includes('pattern') || concept.includes('shape') || concept.includes('contour') || concept.includes('outline') || concept.includes('texture') || concept.includes('surface') || concept.includes('detail')) {
-            numHeatmaps = 2 + Math.floor(Math.random() * 2); // 2-3 heatmaps
-        }
-        if (concept.includes('age') || concept.includes('demographic') || concept.includes('cognitive') || concept.includes('mmse') || concept.includes('moca') || concept.includes('biomarker') || concept.includes('csf') || concept.includes('plasma') || concept.includes('genetic') || concept.includes('apoe') || concept.includes('clinical') || concept.includes('symptom')) {
-            numWaterfalls = 1 + Math.floor(Math.random() * 2); // 1-2 waterfall plots
-        }
-        // Default: at least one visualization
-        if (numHeatmaps === 0 && numWaterfalls === 0) {
-            numWaterfalls = 1;
-        }
-        return {
-            heatmaps: Array.from({length: numHeatmaps}, (_, i) => ({
-                id: i+1, 
-                url: null, 
-                isMock: true,
-                name: `SHAP Heatmap ${i+1} for ${evidenceItem.concept}`,
-                description: `Spatial attention map showing regions contributing to ${evidenceItem.concept}`
-            })),
-            waterfalls: Array.from({length: numWaterfalls}, (_, i) => ({
-                id: i+1, 
-                url: null, 
-                isMock: true,
-                name: `SHAP Waterfall ${i+1} for ${evidenceItem.concept}`,
-                description: `Feature importance breakdown for ${evidenceItem.concept}`
-            }))
-        };
-    }
-
-    // Render overlay/modal with correct number of visualizations
-    renderEvidenceVisualizationsOverlay(evidenceItem, visualizations) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-        if (!modal || !modalTitle || !modalBody) return;
-
-        modalTitle.textContent = `Visualizations for: ${evidenceItem.concept}`;
-        
-        const evidenceTypeColor = evidenceItem.importance > 0 ? '#28a745' : '#dc3545';
-        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
-        
-        let html = `
-            <div style="text-align: center;">
-                <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-                        <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
-                        <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
-                    </div>
-                    <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
-                    <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
-                </div>
-        `;
-        
-        if (visualizations.waterfalls.length > 0) {
-            html += `
-                <div style="margin-bottom: 30px;">
-                    <h4 style="color: #007bff; margin-bottom: 15px;">Waterfall Plots (${visualizations.waterfalls.length})</h4>
-                    <div style="display: grid; gap: 10px;">
-            `;
-            visualizations.waterfalls.forEach((w, idx) => {
-                html += `
-                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;" 
-                         onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"
-                         onclick="alert('Waterfall Plot ${idx+1} - Shows feature contribution breakdown for: ${evidenceItem.concept}')">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span style="font-size: 30px;">📊</span>
-                            <div>
-                                <div style="font-weight: bold; font-size: 16px;">Waterfall Plot ${idx+1}</div>
-                                <div style="font-size: 12px; opacity: 0.8;">Click to view feature contributions</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-        }
-        
-        if (visualizations.heatmaps.length > 0) {
-            html += `
-                <div style="margin-bottom: 30px;">
-                    <h4 style="color: #ee5a24; margin-bottom: 15px;">Heatmaps (${visualizations.heatmaps.length})</h4>
-                    <div style="display: grid; gap: 10px;">
-            `;
-            visualizations.heatmaps.forEach((h, idx) => {
-                html += `
-                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 20px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;" 
-                         onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'"
-                         onclick="alert('Heatmap ${idx+1} - Shows spatial attention regions for: ${evidenceItem.concept}')">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span style="font-size: 30px;">🔥</span>
-                            <div>
-                                <div style="font-weight: bold; font-size: 16px;">Heatmap ${idx+1}</div>
-                                <div style="font-size: 12px; opacity: 0.8;">Click to view attention regions</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-        }
-        
-        html += `
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                    <p style="margin: 0; font-size: 14px; color: #666;">
-                        <strong>API Request:</strong> GET /api/visualizations?evidence_id=${this.generateEvidenceVisualizationId(evidenceItem)}&patient_id=${this.currentPatientId || 'unknown'}
-                    </p>
-                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #888;">
-                        Mock response: ${visualizations.heatmaps.length} heatmaps, ${visualizations.waterfalls.length} waterfall plots
-                    </p>
-                </div>
-            </div>
-        `;
-        modalBody.innerHTML = html;
-        modal.style.display = 'block';
-    }
-
-    generateEvidenceVisualizationId(evidenceItem) {
-        // Create a unique ID based on concept and importance for caching
-        const conceptKey = evidenceItem.concept.toLowerCase().replace(/\s+/g, '_');
-        const importanceKey = Math.round(evidenceItem.importance * 1000);
-        return `${conceptKey}_${importanceKey}`;
-    }
-
-    highlightModelExplanations() {
-        const modelExplanationsCard = document.querySelector('.card-row3-col2');
-        if (modelExplanationsCard) {
-            // Add highlighting effect
-            modelExplanationsCard.style.border = '3px solid #4facfe';
-            modelExplanationsCard.style.boxShadow = '0 0 20px rgba(79, 172, 254, 0.5)';
-            
-            // Scroll to the model explanations section
-            modelExplanationsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Remove highlighting after 2 seconds
-            setTimeout(() => {
-                modelExplanationsCard.style.border = '';
-                modelExplanationsCard.style.boxShadow = '';
-            }, 2000);
-        }
-    }
-
-    async viewWaterfallPlotWithContext(evidenceItem) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        if (!modal || !modalTitle || !modalBody) return;
-
-        const waterfall = this.patientVisualizations?.waterfall;
-        
-        modalTitle.textContent = `Feature Importance: ${evidenceItem.concept}`;
-        
-        if (waterfall && waterfall.url && !waterfall.isMock) {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
-                    </div>
-                    <p><strong>SHAP Waterfall Plot - Feature Contributions</strong></p>
-                    <img src="${waterfall.url}" alt="SHAP Waterfall Plot" 
-                         style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                </div>
-            `;
-        } else {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
-                    </div>
-                    <div style="padding: 40px; background: rgba(79, 172, 254, 0.1); border-radius: 15px; border: 2px dashed #4facfe;">
-                        <p><strong>SHAP Waterfall Plot</strong></p>
-                        <p>Shows how each feature contributes to the model's prediction for this specific case.</p>
-                        <p><em>This visualization would show the feature importance breakdown related to: "${evidenceItem.concept}"</em></p>
-                    </div>
-                </div>
-            `;
-        }
-
-        modal.style.display = 'block';
-    }
-
-    async viewHeatmap(heatmapNum, heatmapName = null, heatmapUrl = null) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        if (!modal || !modalTitle || !modalBody) return;
-
-        // Find the specific heatmap data
-        let heatmapData = null;
-        if (this.patientVisualizations?.heatmaps) {
-            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
-        }
-
-        const title = heatmapName || heatmapData?.name || `SHAP Heatmap ${heatmapNum}`;
-        const imageUrl = heatmapUrl || heatmapData?.url;
-        
-        modalTitle.textContent = title;
-        
-        if (imageUrl && !heatmapData?.isMock) {
-            // Show actual image
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                    <img src="${imageUrl}" alt="${title}" 
-                         style="max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
-                         onload="console.log('Heatmap image loaded successfully')"
-                         onerror="console.error('Failed to load heatmap image'); this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="display: none; padding: 20px; color: #666;">
-                        <p>Failed to load heatmap visualization</p>
-                        <p><em>Image path: ${imageUrl}</em></p>
-                    </div>
-                </div>
-            `;
-        } else {
-            // Show placeholder
-            modalBody.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <p><strong>${title} for Patient ${this.currentPatientId || 'Unknown'}</strong></p>
-                    <div style="background: linear-gradient(145deg, #f0f0f0, #e0e0e0); padding: 40px; border-radius: 8px; margin: 20px 0;">
-                        <p style="color: #666; font-size: 18px; margin: 0;">🔥</p>
-                        <p style="color: #666; margin: 10px 0;">SHAP Heatmap Visualization</p>
-                        <p style="color: #888; font-size: 14px; margin: 0;">
-                            ${heatmapData?.isMock ? 'Mock visualization - actual data not available' : 'No heatmap data available for this patient'}
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-
-        modal.style.display = 'block';
-    }
-
-    async viewHeatmapWithContext(heatmapNum, evidenceItem) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        if (!modal || !modalTitle || !modalBody) return;
-
-        // Find the specific heatmap data
-        let heatmapData = null;
-        if (this.patientVisualizations?.heatmaps) {
-            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
-        }
-
-        const title = heatmapData?.name || `SHAP Heatmap ${heatmapNum}`;
-        const imageUrl = heatmapData?.url;
-        
-        modalTitle.textContent = `Visual Attribution: ${evidenceItem.concept}`;
-        
-        if (imageUrl && !heatmapData?.isMock) {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
-                    </div>
-                    <p><strong>${title} - Visual Evidence</strong></p>
-                    <img src="${imageUrl}" alt="${title}" 
-                         style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 4px 8px rgba(255, 107, 107, 0.2); border: 2px solid #ff6b6b;">
-                </div>
-            `;
-        } else {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <h4 style="margin: 0;">Evidence Context: ${evidenceItem.concept}</h4>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">${evidenceItem.description}</p>
-                        <p style="margin: 5px 0 0 0; font-weight: bold;">Importance: ${Math.round(evidenceItem.importance * 100)}%</p>
-                    </div>
-                    <div style="padding: 40px; background: rgba(255, 107, 107, 0.1); border-radius: 15px; border: 2px dashed #ff6b6b;">
-                        <p><strong>${title}</strong></p>
-                        <p>Visual attention map showing which regions are most important for this prediction.</p>
-                        <p><em>This visualization would highlight areas related to: "${evidenceItem.concept}"</em></p>
-                    </div>
-                </div>
-            `;
-        }
-
-        modal.style.display = 'block';
-    }
-
-    // Individual SHAP Visualization Functions - Each evidence gets its own visualization
-    async viewIndividualSHAPHeatmap(evidenceItem, featureType, heatmapNum = 1) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        if (!modal || !modalTitle || !modalBody) return;
-
-        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
-        
-        // Find the specific heatmap data (or use mock data)
-        let heatmapData = null;
-        if (this.patientVisualizations?.heatmaps) {
-            heatmapData = this.patientVisualizations.heatmaps.find(h => h.id == heatmapNum);
-        }
-
-        const imageUrl = heatmapData?.url;
-        
-        modalTitle.textContent = `SHAP Heatmap: ${evidenceItem.concept}`;
-        
-        // Create evidence-specific content
-        const evidenceTypeColor = evidenceItem.importance > 0 ? '#28a745' : '#dc3545'; // Green for positive, red for negative
-        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
-        
-        if (imageUrl && !heatmapData?.isMock) {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
-                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
-                        </div>
-                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
-                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${evidenceTypeColor};">
-                        <h4 style="margin: 0 0 8px 0; color: #333;">Individual Feature Attribution</h4>
-                        <p style="margin: 0; font-size: 14px; color: #666;">
-                            This heatmap shows exactly how "<strong>${evidenceItem.concept}</strong>" contributes to the model's prediction.
-                            Bright regions indicate areas where this specific feature has the highest impact.
-                        </p>
-                    </div>
-                    
-                    <img src="${imageUrl}" alt="SHAP Heatmap for ${evidenceItem.concept}" 
-                         style="max-width: 100%; max-height: 55vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid ${evidenceTypeColor};">
-                </div>
-            `;
-        } else {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '✅' : '❌'}</span>
-                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
-                        </div>
-                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
-                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 40px; background: linear-gradient(145deg, ${evidenceTypeColor}15, ${evidenceTypeColor}25); border-radius: 15px; border: 2px dashed ${evidenceTypeColor};">
-                        <div style="margin-bottom: 15px;">
-                            <span style="font-size: 40px;">🔥</span>
-                        </div>
-                        <h4 style="margin: 10px 0; color: #333;">Individual SHAP Heatmap</h4>
-                        <p style="margin: 10px 0; color: #666;">
-                            This visualization would show the specific contribution of "<strong>${evidenceItem.concept}</strong>" 
-                            to the model's prediction for this patient.
-                        </p>
-                        <p style="margin: 0; font-size: 14px; color: #888;">
-                            <em>Feature Type: ${featureType.replace(/_/g, ' ')} | Evidence ID: ${evidenceId.substring(0, 12)}...</em>
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-
-        modal.style.display = 'block';
-    }
-
-    async viewIndividualSHAPWaterfall(evidenceItem, featureType) {
-        const modal = document.getElementById('visualization-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        if (!modal || !modalTitle || !modalBody) return;
-
-        const evidenceId = this.generateEvidenceVisualizationId(evidenceItem);
-        
-        const waterfall = this.patientVisualizations?.waterfall;
-        
-        modalTitle.textContent = `SHAP Waterfall: ${evidenceItem.concept}`;
-        
-        // Create evidence-specific content
-        const evidenceTypeColor = evidenceItem.importance > 0 ? '#007bff' : '#fd7e14'; // Blue for positive, orange for negative
-        const evidenceTypeText = evidenceItem.importance > 0 ? 'Evidence FOR' : 'Evidence AGAINST';
-        
-        if (waterfall && waterfall.url && !waterfall.isMock) {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '📈' : '📉'}</span>
-                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
-                        </div>
-                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
-                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${evidenceTypeColor};">
-                        <h4 style="margin: 0 0 8px 0; color: #333;">Individual Feature Impact</h4>
-                        <p style="margin: 0; font-size: 14px; color: #666;">
-                            This waterfall plot shows how "<strong>${evidenceItem.concept}</strong>" pushes the model's prediction 
-                            ${evidenceItem.importance > 0 ? 'toward' : 'away from'} the positive class.
-                        </p>
-                    </div>
-                    
-                    <img src="${waterfall.url}" alt="SHAP Waterfall for ${evidenceItem.concept}" 
-                         style="max-width: 100%; max-height: 55vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid ${evidenceTypeColor};">
-                </div>
-            `;
-        } else {
-            modalBody.innerHTML = `
-                <div style="text-align: center;">
-                    <div style="background: linear-gradient(135deg, ${evidenceTypeColor} 0%, ${evidenceTypeColor}CC 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-                            <span style="font-size: 20px;">${evidenceItem.importance > 0 ? '📈' : '📉'}</span>
-                            <h3 style="margin: 0;">${evidenceTypeText}: ${evidenceItem.concept}</h3>
-                        </div>
-                        <p style="margin: 5px 0; font-size: 14px; opacity: 0.9;">${evidenceItem.description}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                            <span style="font-weight: bold;">SHAP Value: ${(evidenceItem.importance * 100).toFixed(1)}%</span>
-                            <span style="font-size: 12px; opacity: 0.8;">Feature: ${featureType.replace(/_/g, ' ')}</span>
-                        </div>
-                    </div>
-                    
-                    <div style="padding: 40px; background: linear-gradient(145deg, ${evidenceTypeColor}15, ${evidenceTypeColor}25); border-radius: 15px; border: 2px dashed ${evidenceTypeColor};">
-                        <div style="margin-bottom: 15px;">
-                            <span style="font-size: 40px;">📊</span>
-                        </div>
-                        <h4 style="margin: 10px 0; color: #333;">Individual SHAP Waterfall</h4>
-                        <p style="margin: 10px 0; color: #666;">
-                            This visualization would show exactly how "<strong>${evidenceItem.concept}</strong>" 
-                            contributes to the final prediction score.
-                        </p>
-                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid ${evidenceTypeColor};">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="color: #333;">Base Rate:</span>
-                                <span style="color: #666;">+0.2</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-                                <span style="color: ${evidenceTypeColor}; font-weight: bold;">${evidenceItem.concept}:</span>
-                                <span style="color: ${evidenceTypeColor}; font-weight: bold;">${evidenceItem.importance > 0 ? '+' : ''}${(evidenceItem.importance * 0.8).toFixed(3)}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px;">
-                                <span style="color: #333; font-weight: bold;">Final Score:</span>
-                                <span style="color: #333; font-weight: bold;">${(0.2 + evidenceItem.importance * 0.8).toFixed(3)}</span>
-                            </div>
-                        </div>
-                        <p style="margin: 0; font-size: 14px; color: #888;">
-                            <em>Feature Type: ${featureType.replace(/_/g, ' ')} | Evidence ID: ${evidenceId.substring(0, 12)}...</em>
-                        </p>
-                    </div>
-                </div>
-            `;
-        }
-
-        modal.style.display = 'block';
-    }
-}
-
-// Interactive features are now initialized in DOMContentLoaded event
-
-
+radio_buttons.forEach((radio) => {
+    radio.addEventListener("change", function () {
+        radio_button_changed();
+    });
+});
+
+// Keeps the page in-sync when the user clicks the browser Back/Forward buttons
+window.addEventListener('popstate', () => {
+    const pid = get_participant_id_from_url();
+  const sid = get_study_id_from_url();
+  if (sessionStorage.getItem(`study_done_${pid}_${sid}`) === 'true') {
+      window.location.replace(`/feedback/index.html?participant_id=${pid}&study_id=${sid}`);
+      return;               // nothing else in the handler runs
+  }
+
+  const page_nr = get_page_nr_from_url();
+
+  // Refresh the main content for the new page number
+  csv_json_get_all_attributes_and_set_in_html_page(page_nr);
+
+  // Re-load any diagnosis already stored for that page
+  db_get_and_set_participant_diagnosis(
+    get_participant_id_from_url(),
+    get_study_id_from_url(),
+    page_nr
+  );
+
+  // Update the Next/Submit button label
+  button_toggle_next_or_submit();
+});
 
