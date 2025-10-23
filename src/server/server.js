@@ -382,15 +382,20 @@ function cb_event_get_evidence(req, res) {
 
 function cb_event_get_heatmap(req, res) {
     const { imageId } = req.params;
+    const { concept, patientId, diagnosis } = req.query;
     
-    console.log(`Fetching heatmap for image: ${imageId}`);
+    console.log(`Fetching heatmap - concept: ${concept}, patient: ${patientId}, diagnosis: ${diagnosis}`);
     
-    // For now, return a placeholder response
-    // In a real implementation, you would serve the actual heatmap image
+    // Generate heatmap path based on concept
+    // In production, this would dynamically generate or retrieve the actual heatmap
+    const conceptSlug = concept ? concept.toLowerCase().replace(/\s+/g, '_') : 'default';
+    const heatmapPath = `/visualizations/patient_${patientId || 'default'}/heatmap_${conceptSlug}.png`;
+    
     res.json({
-        message: "Heatmap endpoint - would serve actual heatmap image",
-        imageId: imageId,
-        url: `/visualizations/patient_${imageId}/heatmap_1.png`
+        success: true,
+        concept: concept,
+        imagePath: heatmapPath,
+        fallbackPath: `/visualizations/placeholder_heatmap.png`
     });
 }
 
@@ -455,7 +460,7 @@ function cb_event_test_api(req, res) {
 // Register mock API endpoints
 register_get_event("/api/test", cb_event_test_api);
 register_get_event("/api/evidence", cb_event_get_evidence);
-register_get_event("/api/heatmap/:imageId", cb_event_get_heatmap);
+register_get_event("/api/heatmap", cb_event_get_heatmap);
 register_get_event("/api/visualizations/:patientId", cb_event_get_patient_visualizations);
 
 //register_get_event("/read_db_get_last_updated_page_nr", cb_event_get_last_updated_page_nr);

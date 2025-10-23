@@ -509,15 +509,15 @@ function csv_json_get_additional_attributes(page_nr)
 
     concept_card_1_title    = "Concept 1";
     concept_card_1_image    = input.Concept1 ? ("img/" + input.Concept1[index]) : "";
-    concept_card_1_caption  = input.Concept1_Caption ? ("Concept: " + input.Concept1_Caption[index]) : "";
+    concept_card_1_caption  = input.Concept1_Caption ? input.Concept1_Caption[index] : "";
 
     concept_card_2_title    = "Concept 2";
     concept_card_2_image    = input.Concept2 ? ("img/" + input.Concept2[index]) : "";
-    concept_card_2_caption  = input.Concept2_Caption ? ("Concept: " + input.Concept2_Caption[index]) : "";
+    concept_card_2_caption  = input.Concept2_Caption ? input.Concept2_Caption[index] : "";
 
     concept_card_3_title    = "Concept 3";
     concept_card_3_image    = input.Concept3 ? ("img/" + input.Concept3[index]) : "";
-    concept_card_3_caption  = input.Concept3_Caption ? ("Concept: " + input.Concept3_Caption[index]) : "";
+    concept_card_3_caption  = input.Concept3_Caption ? input.Concept3_Caption[index] : "";
 
     attributes = [concept_card_1_title, concept_card_1_image, concept_card_1_caption,
                   concept_card_2_title, concept_card_2_image, concept_card_2_caption,
@@ -530,19 +530,25 @@ function set_additional_attributes_in_html_page(page_nr, attr)
 {
     const concept1Title = document.getElementById("concept-card-1-title");
     const concept1Image = document.getElementById("concept-card-1-image");
+    const concept1Caption = document.getElementById("concept-card-1-caption");
     const concept2Title = document.getElementById("concept-card-2-title");
     const concept2Image = document.getElementById("concept-card-2-image");
+    const concept2Caption = document.getElementById("concept-card-2-caption");
     const concept3Title = document.getElementById("concept-card-3-title");
     const concept3Image = document.getElementById("concept-card-3-image");
+    const concept3Caption = document.getElementById("concept-card-3-caption");
 
     if (concept1Title) concept1Title.textContent = attr[0];
     if (concept1Image) concept1Image.src = attr[1];
+    if (concept1Caption) concept1Caption.textContent = attr[2];
 
     if (concept2Title) concept2Title.textContent = attr[3];
     if (concept2Image) concept2Image.src = attr[4];
+    if (concept2Caption) concept2Caption.textContent = attr[5];
 
     if (concept3Title) concept3Title.textContent = attr[6];
     if (concept3Image) concept3Image.src = attr[7];
+    if (concept3Caption) concept3Caption.textContent = attr[8];
 }
 
 async function init_page()
@@ -631,16 +637,25 @@ window.addEventListener('popstate', () => {
 
 class InteractiveFeatures {
   constructor() {
-    this.evidenceRow = document.getElementById('evidence-row');
+    this.evidenceCard = document.getElementById('evidence-card');
     this.evidenceForList = document.getElementById('evidence-for-list');
     this.evidenceAgainstList = document.getElementById('evidence-against-list');
     this.evidenceForDiagnosis = document.getElementById('evidence-for-diagnosis');
     this.evidenceAgainstDiagnosis = document.getElementById('evidence-against-diagnosis');
+    
+    // Heatmap card elements
+    this.heatmapCard = document.getElementById('heatmap-card');
+    this.heatmapCardTitle = document.getElementById('heatmap-card-title');
+    this.heatmapCardImage = document.getElementById('heatmap-card-image');
+    this.heatmapCardConcept = document.getElementById('heatmap-card-concept');
+    this.heatmapCardImportance = document.getElementById('heatmap-card-importance');
+    
     this.modal = document.getElementById('visualization-modal');
     this.modalTitle = document.getElementById('modal-title');
     this.modalBody = document.getElementById('modal-body');
     this.modalClose = document.querySelector('.modal-close');
     this.currentDiagnosis = null;
+    this.currentPatientId = null;
 
     this.init();
   }
@@ -653,17 +668,8 @@ class InteractiveFeatures {
     radioButtons.forEach(radio => {
       radio.addEventListener('change', () => {
         this.currentDiagnosis = radio.value;
-        this.showEvidenceRow();
+        this.showEvidenceCard();
         this.fetchEvidence();
-      });
-    });
-
-    // Heatmap buttons
-    const heatmapBtns = document.querySelectorAll('.heatmap-btn');
-    heatmapBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const heatmapNum = e.target.dataset.heatmap;
-        this.viewHeatmap(heatmapNum);
       });
     });
 
@@ -682,15 +688,15 @@ class InteractiveFeatures {
     }
   }
 
-  showEvidenceRow() {
-    if (this.evidenceRow) {
-      this.evidenceRow.style.display = 'grid';
+  showEvidenceCard() {
+    if (this.evidenceCard) {
+      this.evidenceCard.style.display = 'flex';
     }
   }
 
-  hideEvidenceRow() {
-    if (this.evidenceRow) {
-      this.evidenceRow.style.display = 'none';
+  hideEvidenceCard() {
+    if (this.evidenceCard) {
+      this.evidenceCard.style.display = 'none';
     }
   }
 
@@ -703,8 +709,8 @@ class InteractiveFeatures {
     console.log(`Fetching evidence for: ${this.currentDiagnosis}`);
 
     try {
-      const patientId = get_patient_id_from_url() || 'patient_1';
-      const response = await fetch(`/api/evidence?diagnosis=${this.currentDiagnosis}&patientId=${patientId}`);
+      this.currentPatientId = get_patient_id_from_url() || 'patient_1';
+      const response = await fetch(`/api/evidence?diagnosis=${this.currentDiagnosis}&patientId=${this.currentPatientId}`);
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -769,13 +775,69 @@ class InteractiveFeatures {
 
   createEvidenceItem(item, type) {
     const div = document.createElement('div');
-    div.className = `evidence-item ${type}`;
+    div.className = `evidence-item ${type} clickable-evidence`;
     div.innerHTML = `
       <div class="evidence-concept">${item.concept}</div>
       <div class="evidence-description">${item.description}</div>
       <div class="evidence-importance">Importance: ${Math.round(item.importance * 100)}%</div>
     `;
+    
+    // Make evidence item clickable to show heatmap
+    div.style.cursor = 'pointer';
+    div.addEventListener('click', () => {
+      this.loadHeatmapForEvidence(item, type);
+    });
+    
     return div;
+  }
+
+  async loadHeatmapForEvidence(evidence, type) {
+    console.log(`Loading heatmap for: ${evidence.concept} (${type})`);
+    
+    // Update heatmap card title
+    this.heatmapCardTitle.textContent = evidence.concept;
+    
+    // Update concept and importance text
+    this.heatmapCardConcept.textContent = evidence.description;
+    this.heatmapCardImportance.textContent = `${Math.round(evidence.importance * 100)}%`;
+    
+    // Fetch heatmap from backend
+    try {
+      const response = await fetch(`/api/heatmap?concept=${encodeURIComponent(evidence.concept)}&patientId=${this.currentPatientId}&diagnosis=${this.currentDiagnosis}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Heatmap data received:', data);
+      
+      // Update heatmap image
+      if (data.imagePath) {
+        this.heatmapCardImage.src = data.imagePath;
+        this.heatmapCardImage.style.display = 'block';
+      } else {
+        throw new Error('No image path in response');
+      }
+    } catch (error) {
+      console.error('Error fetching heatmap:', error);
+      // Use mock/placeholder heatmap
+      this.loadMockHeatmap(evidence);
+    }
+  }
+
+  loadMockHeatmap(evidence) {
+    // Generate a placeholder heatmap path based on concept name
+    const conceptSlug = evidence.concept.toLowerCase().replace(/\s+/g, '_');
+    const mockPath = `img/heatmap_${conceptSlug}.png`;
+    
+    this.heatmapCardImage.src = mockPath;
+    this.heatmapCardImage.style.display = 'block';
+    
+    // Fallback to a generic placeholder if the specific one doesn't exist
+    this.heatmapCardImage.onerror = () => {
+      this.heatmapCardImage.src = 'img/placeholder_heatmap.png';
+    };
   }
 
   getDiagnosisLabel(value) {
@@ -787,23 +849,6 @@ class InteractiveFeatures {
       'unhealthy': 'Critical OCDegen'
     };
     return labels[value] || value;
-  }
-
-  async viewHeatmap(heatmapNum) {
-    console.log(`Viewing heatmap ${heatmapNum}`);
-
-    const patientId = get_patient_id_from_url() || '1';
-    const conceptNum = heatmapNum;
-
-    // Try to use the concept images from the current page
-    const conceptImage = document.getElementById(`concept-card-${conceptNum}-image`);
-
-    if (conceptImage && conceptImage.src) {
-      this.showModal(`Concept ${conceptNum} Heatmap`, conceptImage.src);
-    } else {
-      // Fallback to mock or placeholder
-      this.showModal(`Concept ${conceptNum} Heatmap`, `img/placeholder_heatmap_${heatmapNum}.png`);
-    }
   }
 
   showModal(title, imageSrc) {

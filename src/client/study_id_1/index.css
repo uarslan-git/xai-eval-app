@@ -33,8 +33,8 @@
   --border2: none;
 
   /*Viki_Commment: Only the following has to be modified between 3CARDS, 4CARDS, 5CARDS and 6CARDS layout*/
-  --grid-row1-ncolumns: 4;
-  /* viki_comment: only change this value to increase or decrease columns in first row */
+  --grid-row1-ncolumns: 2;
+  /* viki_comment: 2 columns - patient image + heatmap card */
   --grid-template-row1-columns: repeat(var(--grid-row1-ncolumns), 1fr);
   /* Use var() inside repeat() */
 
@@ -209,8 +209,8 @@ main {
   display: grid;
   background: none;
   border-radius: 8px;
-  grid-template-columns: 1.5fr 2.5fr 1.5fr;
-  /*60% 39%*/
+  grid-template-columns: 1fr 1fr;
+  /* Two columns: diagnosis and evidence */
   height: 100%;
   /* Use full available height */
   overflow: visible;
@@ -232,8 +232,8 @@ main {
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.20);
   border-radius: 8px;
-  grid-template-rows: 8% 73% 19%;
-  /* Row heights as specified */
+  grid-template-rows: 8% 68% 24%;
+  /* Row heights adjusted: more space for caption, less for image */
 
   overflow: hidden;
 }
@@ -269,7 +269,7 @@ main {
   padding-left: 20px;
   background: none;
   padding-top: 0px;
-  overflow-y: auto;
+  overflow: visible;
   font-size: 0.9rem;
   color: #555;
   align-items: center;
@@ -471,7 +471,7 @@ button[disabled]:hover {
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  overflow-y: auto;
+  overflow: visible;
   margin-left: 0;
   font-size: 15px;
   padding: 15px;
@@ -488,7 +488,7 @@ button[disabled]:hover {
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  overflow-y: auto;
+  overflow: visible;
   margin-left: 0;
   padding: 15px;
 }
@@ -807,8 +807,8 @@ input[type="radio"]:checked::after {
   display: grid;
   background: none;
   border-radius: 8px;
-  grid-template-columns: 1fr 1fr;
-  /* Two equal columns */
+  grid-template-columns: 1fr;
+  /* Single column for evidence */
   height: 100%;
   /* Use full available height */
   border: var(--border2);
@@ -826,7 +826,7 @@ input[type="radio"]:checked::after {
   border-radius: 12px;
   padding: 20px;
   border: none;
-  overflow-y: auto;
+  overflow: visible;
   transition: all 0.3s ease;
   height: 100%;
 }
@@ -838,7 +838,7 @@ input[type="radio"]:checked::after {
 
 .evidence-container {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow: visible;
   max-height: none;
 }
 
@@ -878,19 +878,29 @@ input[type="radio"]:checked::after {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
+  cursor: pointer;
 }
 
 .evidence-item:hover {
   transform: translateX(3px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 1);
 }
 
 .evidence-item.for {
   border-left-color: #198754;
 }
 
+.evidence-item.for:hover {
+  border-left-color: #20c997;
+}
+
 .evidence-item.against {
   border-left-color: #ee6c4d;
+}
+
+.evidence-item.against:hover {
+  border-left-color: #ff8566;
 }
 
 .evidence-concept {
@@ -922,7 +932,7 @@ input[type="radio"]:checked::after {
   border-radius: 12px;
   padding: 20px;
   border: none;
-  overflow-y: auto;
+  overflow: visible;
   transition: all 0.3s ease;
   height: 100%;
 }

@@ -27,7 +27,7 @@
 
     <!-- MAIN -->
     <main>
-      <!-- ROW 1 :  Patient image + 3 Concept cards -->
+      <!-- ROW 1 :  Patient image + Concept/Heatmap card -->
       <div class="main-row1">
 
         <!-- Patient image card -->
@@ -39,56 +39,37 @@
                src=""
                alt="Patient Image" />
 
-          <!-- Hidden placeholder so existing JS call is safe -->
-          <div class="caption" style="display:none">
-            <span id="x-ray-location"></span>
+          <!-- Caption with patient details -->
+          <div class="caption">
+            <p><b>X-Ray Location:</b> <span id="x-ray-location"></span></p>
+            <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span></p>
+            <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
           </div>
         </div>
 
-        <!-- Concept 1 card -->
-        <div class="card-row1-col2-3-4-5">
-          <div id="concept-card-1-title" class="title">Concept 1</div>
-          <img id="concept-card-1-image" src="" alt="Concept 1 Heatmap" class="image">
-        </div>
-
-        <!-- Concept 2 card -->
-        <div class="card-row1-col2-3-4-5">
-          <div id="concept-card-2-title" class="title">Concept 2</div>
-          <img id="concept-card-2-image" src="" alt="Concept 2 Heatmap" class="image">
-        </div>
-
-        <!-- Concept 3 card -->
-        <div class="card-row1-col2-3-4-5">
-          <div id="concept-card-3-title" class="title">Concept 3</div>
-          <img id="concept-card-3-image" src="" alt="Concept 3 Heatmap" class="image">
+        <!-- Concept/Heatmap card (will update when evidence is clicked) -->
+        <div class="card-row1-col2-3-4-5" id="heatmap-card">
+          <div id="heatmap-card-title" class="title">Select Evidence to View Heatmap</div>
+          <img id="heatmap-card-image" src="" alt="Heatmap" class="image" style="display: none;">
+          <div class="caption">
+            <p><b>Concept:</b> <span id="heatmap-card-concept"></span></p>
+            <p><b>Importance:</b> <span id="heatmap-card-importance"></span></p>
+          </div>
         </div>
 
       </div> <!-- /main-row1 -->
 
 
-      <!-- ROW 2 : explanation + interaction -->
-      <div class="main-row2">
+      <!-- ROW 2 : Diagnosis + Evidence side by side -->
+      <div class="main-row2" id="diagnosis-evidence-row">
       
-        <!-- Card for OCDegen Biomarkers in Column 2 of main-row1 -->
-        <div class="card-row2-col1">
-          <h3 class="title">OCDegen Biomarkers</h3>
-          <ul class="biomarkers-list">
-            <li>Strong Spine Bend</li>
-            <li>Strong Bone Variation</li>
-            <li>Tucked Head</li>
-            <li>Main Bones Mutation</li>
-          </ul>
-        </div>
-      
+        <!-- Diagnosis Card -->
         <div class="card-row2-col2">
           <h3 class="title">Blocky Diagnosis</h3>
       
           <div class="card-content">
-            <!-- Left: AI and ground truth diagnosis -->
+            <!-- Left: Present biomarkers -->
             <div class="left-content">
-              <p><b>Suggested Diagnosis:</b> <span id="suggested-diag-location2" class="unhealthy"></span>
-              </p>
-              <p><b>True Diagnosis:</b> <span id="true-diag" class="healthy"></span></p>
               <p><b>Present Biomarkers:</b> <span id="X_RAY_Trait"></span></p>
             </div>
       
@@ -113,25 +94,9 @@
             </div>
           </div>
         </div>
-      
-        <div class="card-row2-col1">
-          <h3 class="card-warning">Warning</h3>
-          <p class="card-warning-text">
-            OCDegen can be fatal if not diagnosed and treated early. Treatment, however, is costly and
-            highly invasive.
-            Please
-            verify all diagnoses before making your final decision. Furthermore, incorrect responses
-            negatively affect your
-            performance bonus.
-          </p>
-        </div><!-- <div class="card-row2-col1">  -->
-      
-      </div> <!-- <div class="main-row2"> -->
 
-      <!-- ROW 3: Interactive Evidence and Visualizations -->
-      <div class="main-row3" id="evidence-row" style="display: none;">
         <!-- Evidence Panel -->
-        <div class="card-row3-col1">
+        <div class="card-row3-col1" id="evidence-card" style="display: none;">
           <h3 class="title">Diagnostic Evidence</h3>
           
           <div id="evidence-container" class="evidence-container">
@@ -146,22 +111,8 @@
             </div>
           </div>
         </div>
-
-        <!-- Heatmaps Panel -->
-        <div class="card-row3-col2">
-          <h3 class="title">Model Heatmaps</h3>
-          <div class="visualizations-container">
-            <div class="heatmaps-section">
-              <div id="heatmaps-container" class="heatmaps-grid">
-                <button class="heatmap-btn" data-heatmap="1">Heatmap 1</button>
-                <button class="heatmap-btn" data-heatmap="2">Heatmap 2</button>
-                <button class="heatmap-btn" data-heatmap="3">Heatmap 3</button>
-                <button class="heatmap-btn" data-heatmap="4">Heatmap 4</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> <!-- <div class="main-row3"> -->
+      
+      </div> <!-- <div class="main-row2"> -->
 
       <!-- Modal for viewing visualizations -->
       <div id="visualization-modal" class="modal" style="display: none;">
