@@ -483,8 +483,8 @@ button[disabled]:hover {
   /* Maximum width for diagnosis card */
   min-width: 350px;
   /* Minimum width to prevent squashing */
-  height: 100%;
-  /* Use full available height */
+  height: fit-content;
+  /* Prevent scaling with evidence card appearance */
   background: white;
   box-shadow: 0 0px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
@@ -840,10 +840,19 @@ input[type="radio"]:checked::after {
   flex-grow: 1;
   overflow: visible;
   max-height: none;
+  flex-direction: row;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 .evidence-section {
   margin-bottom: 15px;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.evidence-section:last-child {
+  margin-right: 0;
 }
 
 .evidence-title {
