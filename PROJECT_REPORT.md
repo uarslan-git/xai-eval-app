@@ -741,9 +741,121 @@ src/server/
 └── server.js (Updated heatmap API endpoint)
 ```
 
-### API Endpoints
-- `GET /api/evidence?diagnosis={value}&patientId={id}` - Returns evidence for diagnosis
-- `GET /api/heatmap?concept={name}&patientId={id}&diagnosis={value}` - Returns heatmap data
+### API Documentation
+
+Note: During development this project talks to a mock backend implemented in `src/server/server.js`. The mock endpoints return deterministic JSON that mimics the real service. The API contract below documents the endpoints the frontend expects and includes example requests/responses, error modes, and guidance for testing the mock service.
+
+#### Common behaviors
+- All endpoints accept and return JSON unless otherwise noted.
+- Query parameters are used for read-only requests for easy debugging in the browser address bar.
+- The mock server returns a `200` JSON response for successful requests and uses a simple error status for failures. Production services should expand error handling (401/403/500 semantics).
+
+---
+
+#### GET /api/evidence
+Description: Return evidence (for / against) for a given diagnosis and patient.
+Query parameters:
+- `diagnosis` (string, required) — one of: `healthy`, `mild`, `moderate`, `severe`, `unhealthy`.
+- `patientId` (string, optional) — patient identifier used to scope returned evidence.
+
+Example request (curl):
+```bash
+curl -s "http://localhost:7000/api/evidence?diagnosis=severe&patientId=patient_35"
+```
+
+Successful response (200):
+```json
+{
+  "evidenceFor": [
+    { "concept": "Strong Spine Bend", "description": "Significant curvature detected in spine region", "importance": 0.85 },
+    { "concept": "Bone Variation", "description": "Unusual bone density patterns observed", "importance": 0.72 }
+  ],
+  "evidenceAgainst": [
+    { "concept": "Normal Structure", "description": "Main bone structure appears within normal range", "importance": 0.45 }
+  ]
+}
+```
+
+Error responses:
+- `400 Bad Request` — when required parameters are missing (implementation note: mock server currently returns 200 with empty lists instead).
+
+Usage notes:
+- The frontend displays the `concept`, `description`, and `importance` fields. Importance is a 0..1 float; the UI presents it as a percentage.
+
+---
+
+#### GET /api/heatmap
+Description: Return the heatmap resource for a selected evidence concept in a specific patient context. The frontend expects a JSON response with an `imagePath` (URL path) that can be assigned to an `<img>`.
+Query parameters:
+- `concept` (string, required) — the evidence concept name (e.g., `Strong Spine Bend`).
+- `patientId` (string, optional) — patient identifier to scope visualizations.
+- `diagnosis` (string, optional) — optional context for generating diagnosis-specific views.
+
+Example request (curl):
+```bash
+curl -s "http://localhost:7000/api/heatmap?concept=Strong%20Spine%20Bend&patientId=patient_35&diagnosis=severe"
+```
+
+Successful response (200):
+```json
+{
+  "success": true,
+  "concept": "Strong Spine Bend",
+  "imagePath": "/visualizations/patient_patient_35/heatmap_strong_spine_bend.png",
+  "fallbackPath": "/visualizations/placeholder_heatmap.png"
+}
+```
+
+Error responses / fallback behavior:
+- If the backend cannot produce a concept-specific image it should return `success: false` or omit `imagePath` — the frontend falls back to `fallbackPath` or a local placeholder image.
+
+Usage notes:
+- The frontend calls this endpoint when the user clicks an evidence item. The response `imagePath` is assigned to the heatmap `<img>` element. For development the server returns a plausible path (mock) and the frontend has fallback logic that attempts to load a local `img/heatmap_<concept_slug>.png` and finally `img/placeholder_heatmap.png` if needed.
+
+---
+
+#### Other helper endpoints (mock)
+- `GET /api/test` — simple JSON to verify the API server is running. Returns `{ message: "API is working!", timestamp: "..." }`.
+- `GET /api/visualizations/:patientId` — returns a list of available visualization files for a patient (mocked).
+
+---
+
+## Testing the mock API locally
+From the project root run the project's start script (see README or `docker.start.sh` if you're using containers). The mock server listens on the configured port (default 7000 in this project).
+
+Quick checks:
+```bash
+# server health
+curl -s http://localhost:7000/api/test | jq
+
+# evidence (example)
+curl -s "http://localhost:7000/api/evidence?diagnosis=mild&patientId=patient_1" | jq
+
+# heatmap (example)
+curl -s "http://localhost:7000/api/heatmap?concept=Bone%20Variation&patientId=patient_1" | jq
+```
+
+Browser console (developer testing):
+```javascript
+// After the page loads, trigger the built-in test helper
+testHeatmapSystem(); // loads a mock evidence heatmap into the heatmap card
+
+// Or fetch evidence interactively
+fetch('/api/evidence?diagnosis=moderate&patientId=patient_1').then(r=>r.json()).then(console.log)
+```
+
+---
+
+## Production notes & contract guidance
+- Authentication: the mock server does not require auth. In production introduce an auth layer (OAuth2/JWT) and include `Authorization: Bearer <token>` header in requests.
+- Validation: server must validate `concept` and `diagnosis` inputs to prevent injection and ensure resource mapping.
+- Caching: heatmap images should include Cache-Control headers when stable. Consider ETag/Last-Modified for cache validation.
+- Error semantics: use standard HTTP status codes (400, 401, 403, 404, 500) and include a JSON error body `{ error: 'string', code: <int> }` for easier frontend handling.
+- Pagination / filtering: if evidence lists grow large, add pagination or server-side filtering by `importance` or `category`.
+
+---
+
+### Browser Compatibility
 
 ### Browser Compatibility
 - Chrome 90+
